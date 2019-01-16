@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package timeSeriesAnomalyDetection;
+
+message InputParameters {
+	string timeseries = 1;
+    string alphabet = 2;
+    string slidingwindowsize = 3;
+    string ppasize = 4;
+    string debugflag = 5;
+}
+
+message OutputString {
+    string output = 1;
+}
+
+service ServiceDefinition {
+    rpc run(InputParameters) returns (OutputString) {}
+}

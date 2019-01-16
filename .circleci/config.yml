@@ -1,0 +1,75 @@
+defaults: &defaults
+  docker:
+  - image: circleci/python:3.6.6-node
+  working_directory: ~/singnet
+  environment:
+
+    SERVICE_NAME: TSAD
+    AUTHOR: ALYSSON
+    REPOSITORY: TSAD-service
+    BRANCH: master
+    GIT_OWNER: Ophien
+    SERVICE_DAEMON_PORT: 7090
+
+    PROD_DOCKER_IMAGE_NAME: prod_alysson_time_series_anomaly_discovery
+    PROD_DOCKER_CONTAINER_NAME: PROD_ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY
+    STAGING_DOCKER_IMAGE_NAME: alysson_time_series_anomaly_discovery_staging
+    STAGING_DOCKER_CONTAINER_NAME: ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY_STAGING
+      
+version: 2
+jobs:
+  service_up:    
+    <<: *defaults
+    steps:
+    - run:
+        name: Build docker image
+        command: |
+          ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
+            docker image build -t $STAGING_DOCKER_IMAGE_NAME https://raw.githubusercontent.com/$GIT_OWNER/$REPOSITORY/$BRANCH/Dockerfile
+          EOF
+    - run:
+        name: Start and perform integration tests
+        command: |
+          ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
+            docker stop $STAGING_DOCKER_CONTAINER_NAME || true
+            docker rm $STAGING_DOCKER_CONTAINER_NAME || true
+            docker run -td --name $STAGING_DOCKER_CONTAINER_NAME $STAGING_DOCKER_IMAGE_NAME
+          EOF
+    - run:
+        name: Deploy service
+        command: |
+          ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
+            if [ $CIRCLE_REPOSITORY_URL = "git@github.com:$GIT_OWNER/$REPOSITORY.git" ] && [ $CIRCLE_BRANCH = "$BRANCH" ] ; then
+              echo
+              echo "Stopping previous containers"
+              docker stop $STAGING_DOCKER_CONTAINER_NAME || true
+              docker rm $STAGING_DOCKER_CONTAINER_NAME || true 
+              docker stop $PROD_DOCKER_CONTAINER_NAME || true
+              docker rm $PROD_DOCKER_CONTAINER_NAME || true
+              echo "Containers stopped"
+              echo
+              echo "Creating production image tag"
+              docker rmi $PROD_DOCKER_IMAGE_NAME || true
+              docker image tag $STAGING_DOCKER_IMAGE_NAME $PROD_DOCKER_IMAGE_NAME
+              echo "Image created"
+              echo
+              echo "Starting service container"
+              docker run -di --restart unless-stopped -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT --name $PROD_DOCKER_CONTAINER_NAME $PROD_DOCKER_IMAGE_NAME
+              echo "Container started"
+              echo
+            else
+              echo "Repository: $CIRCLE_REPOSITORY_URL"
+              echo "Branch: $CIRCLE_BRANCH"
+              echo "================================================================================"
+              echo "                        Service WILL NOT be deployed"
+              echo "================================================================================"
+              docker stop $STAGING_DOCKER_CONTAINER_NAME || true
+              docker rm $STAGING_DOCKER_CONTAINER_NAME || true
+              docker rmi $STAGING_DOCKER_IMAGE_NAME || true
+            fi
+          EOF
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - service_up
