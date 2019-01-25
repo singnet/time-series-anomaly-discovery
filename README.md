@@ -32,7 +32,7 @@ This service allows to detect anomalies in time series as accomplished by [[1]](
 
 [Density Curve][densitycurve_docs] - Density curve generator based on context free grammar rules [[1]](#anomalies_detection_general).
 
-[Efficient, rule density-based anomaly discovery][erdb_docs] - Detect anomalies on a generated density curve, based on a hill-climbing inspired algorithm [[1]](#anomalies_detection_general)]
+[Efficient, rule density-based anomaly discovery][erdb_docs] - Detect anomalies on a generated density curve, based on a hill-climbing inspired algorithm [[1]](#anomalies_detection_general).
 
 For a detailed explanation about how this service works see the [users guide][users_guide].
 
@@ -55,11 +55,12 @@ make clean; make
 ```
 </p></details>
 
+
 Besides building the source, this command will check the responsiveness of real requests to this service GRPC server.
 
 ## Running
 
-In order to compile and get this service running locally, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be build, run integration tests, the localhost GRPC server, and the daemon to handle requests to this service.
+In order to compile and get this service running locally, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, run integration tests, the localhost GRPC server, and the daemon to handle requests to this service.
 
 ```
 ./setup.sh -r
@@ -78,6 +79,7 @@ snetd --config snetd.config.json &
 ./bin/server &
 ```
 </p></details>
+
 
 The daemon and the GRPC are initially configurated to listen at 0.0.0.0:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
 
@@ -108,6 +110,7 @@ snet service metadata-add-endpoints https://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON
 snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 ```
 </p></details>
+
 
 This command will publish the service with the specified information located at the [service configuration file][service_confi_file] located in the project's root directory.
 
@@ -146,6 +149,7 @@ echo $DAEMON_RESPONSE
 echo
 ```
 </p></details>
+
 
 This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file].
 
