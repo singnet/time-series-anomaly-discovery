@@ -12,7 +12,7 @@ RUN mkdir -p ${SERVICE_CORE}
 RUN apt-get update
 
 # install GRPC deps, clean build, and tests
-RUN apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+RUN apt-get install -y git nlohmann-json-dev build-essential autoconf libtool pkg-config \
                        libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                        wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev
 
