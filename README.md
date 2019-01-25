@@ -114,7 +114,7 @@ snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 
 This command will publish the service with the specified information located at the [service configuration file][service_confi_file] located in the project's root directory.
 
-## Performing deploy test
+## Performing a deployment test
 
 To perform a deploy test, run the following command.
 
