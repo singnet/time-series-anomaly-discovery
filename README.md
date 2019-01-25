@@ -34,7 +34,7 @@ This service allows to detect anomalies in time series as accomplished by [[1]](
 
 [Efficient, rule density-based anomaly discovery][erdb_docs] - Detect anomalies on a generated density curve, based on a hill-climbing inspired algorithm [[1]](#anomalies_detection_general)]
 
-For a detailed explanation about how this service works see its 
+For a detailed explanation about how this service works see the [users guide][users_guide].
 
 ## Compile
 
@@ -44,7 +44,7 @@ To compile this project's source and perform integration tests, run one of the f
 ./setup.sh -c
 ```
 
-<details><summary>Click here to see the called commands!</summary><p>
+<details><summary>Click here to see the commands called by './setup.sh -c'</summary><p>
     
 ```
 # build source
@@ -65,7 +65,7 @@ In order to compile and get this service running locally, run the [setup.sh][set
 ./setup.sh -r
 ```
 
-<details><summary>Click to see the called commands!</summary><p>
+<details><summary>Click here to see the commands called by './setup.sh -r'</summary><p>
     
 ```
 # create snet daemon snetd.config.json file
@@ -89,7 +89,7 @@ To publish this service call the following.
 ./setup.sh -p
 ```
 
-<details><summary>Click to see the called commands!</summary><p>
+<details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
 ```
 # delete service before trying to publish it
@@ -119,7 +119,7 @@ To perform a deploy test, run the following command.
 ./setup.sh -e
 ```
 
-<details><summary>Click to see the called commands!</summary><p>
+<details><summary>Click here to see the commands called by './setup.sh -e'</summary><p>
     
 ```
 echo
