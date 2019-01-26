@@ -22,13 +22,6 @@ This repository contains the [C++ service][cpp-tutorial] for Grammar-Based Compr
 
 # Dependencies
 
-This source was tested on Ubuntu 18.04 and it depends primarily on the following packages.
-
-```
-nlohmann-json-dev 
-grpc
-```
-
 In order to install all the recommended packages to handle this service run the following command.
 
 ```
@@ -93,11 +86,13 @@ For a detailed explanation about how this service works see the [users guide][us
 
 ## Compile
 
-To compile this project's source and perform integration tests, run one the following command in the project's root directory.
+To compile this project's source and perform integration tests, run the following command in the project's root directory.
 
 ```
 ./setup.sh -c
 ```
+
+Besides building the source, this command will check the responsiveness of real requests to this service GRPC server.
 
 <details><summary>Click here to see the commands called by './setup.sh -c'</summary><p>
     
@@ -110,9 +105,6 @@ make clean; make
 ```
 </p></details>
 
-
-Besides building the source, this command will check the responsiveness of real requests to this service GRPC server.
-
 ## Running
 
 In order to compile and get this service running locally, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, run integration tests, the localhost GRPC server, and the daemon to handle requests to this service.
@@ -120,6 +112,8 @@ In order to compile and get this service running locally, run the [setup.sh][set
 ```
 ./setup.sh -r
 ```
+
+The daemon and the GRPC are initially configurated to listen at 54.203.198.53:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
 
 <details><summary>Click here to see the commands called by './setup.sh -r'</summary><p>
     
@@ -135,9 +129,6 @@ snetd --config snetd.config.json &
 ```
 </p></details>
 
-
-The daemon and the GRPC are initially configurated to listen at 0.0.0.0:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
-
 ## Publishing
 
 To publish this service call the following.
@@ -146,8 +137,7 @@ To publish this service call the following.
 ./setup.sh -p
 ```
 
-Just remember that in order to publish the service, an identity must be created.
-
+This command will publish the service with the specified information located at the [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish the service, an identity must be created.
 
 <details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
@@ -169,9 +159,6 @@ snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 ```
 </p></details>
 
-
-This command will publish the service with the specified information located at the [service configuration file][service_confi_file] located in the project's root directory.
-
 ## Performing a deployment test
 
 To perform a deploy test, run the following command.
@@ -179,6 +166,8 @@ To perform a deploy test, run the following command.
 ```
 ./setup.sh -e
 ```
+
+This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file].
 
 <details><summary>Click here to see the commands called by './setup.sh -e'</summary><p>
     
@@ -208,19 +197,15 @@ echo
 ```
 </p></details>
 
+## Docker image
 
-This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file].
-
-## Building docker ready image
-
-In order to build and run a docker ready image for this service use the command described bellow.
+In order to build and run a docker image for this service use the command described bellow.
 
 ```
 docker build -t times-series-anomaly-discovery:dev .
 docker run -tdi --name time-series-anomaly-discovery-container times-series-anomaly-discovery:dev
 docker exec -it time-series-anomaly-discovery-container /bin/bash
 ```
-
 
 ## Contributing and Reporting Issues
 
