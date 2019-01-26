@@ -46,7 +46,4 @@ RUN cd /opt; \
 RUN cd ${SERVICE_CORE}; \
     git clone https://github.com/Ophien/time-series-anomaly-discovery.git
 
-
-WORKDIR ${SERVICE_CORE}/${REPO_NAME}
-
-CMD ["/bin/sh", "-c", "setup.sh -r"]
+CMD ["/bin/sh", "-c", "${SERVICE_CORE}/${REPO_NAME}/setup.sh -r"]
