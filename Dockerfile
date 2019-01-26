@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 
 # working directory
 ENV SERVICE_CORE=/home/ubuntu/service
-ENV REPO_NAME=TSAD-service
+ENV REPO_NAME=time-series-anomaly-discovery
 
 # make folders
 RUN mkdir -p ${SERVICE_CORE}
