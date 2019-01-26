@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+
 ################################################
 # -------------------------------------------- #
 # ------------ SETUP PARAMETERS -------------- #
@@ -15,15 +17,18 @@ RUN_VAR=0
 INTEGRATION_VAR=0
 DAEMON_VAR=0
 PUBLISH_VAR=0
+INSTALL_VAR=0
 REQUEST_VAR=0
 LOAD_CONFIG_VAR=0
 USAGE_VAR=0
+
+
 
 # usage printing method
 usage()
 {
     echo 
-    echo "usage: setup.sh [-c | --compile] [-r | --run] [-p | --publish] [-r | --request] [-h | --help]"
+    echo "usage: setup.sh [-c | --compile] [-r | --run] [-p | --publish] [-r | --request] [-i | --install_deps ] [-h | --help]"
     echo
     echo "This setup allow to build, publish, run, and test the service."
     echo
@@ -31,17 +36,19 @@ usage()
     echo "  -r | --run          Run the daemon and service GRPC server."
     echo "  -p | --publish      Publish service with the specified service info."
     echo "  -e | --request      Call for this service with specified service info."
+    echo "  -i | --install_deps Install all dependencies to build and run this service."
     echo "  -h | --help         Display help message and exit."
     echo 
 }
 
 # filter all entered options
-while getopts 'crpeh' flag; do
+while getopts 'crpeih' flag; do
   case "${flag}" in
     c) COMPILE_VAR=1 ;;
     r) RUN_VAR=1 ;;
     p) PUBLISH_VAR=1 ;;
     e) REQUEST_VAR=1 ;;
+    i) INSTALL_VAR=1 ;;
     h) usage
        exit ;;
     *) usage
@@ -75,17 +82,18 @@ TEST_CALL_INPUT_VAR=
 TEST_CALL_METHOD_VAR=
 
 # this script's path
-PATH=$(dirname "$0")
+PROJECT_PATH="$(dirname "$0")"
 
 # try to load config file
-if [ -f "$PATH/service_conf" ]; then
+if [ -f "$PROJECT_PATH/service_conf" ]; then
     # setup input parameters
     echo
     echo "Loading 'service_conf' file."
 
     # loading config file
-    source $PATH/service_conf
+    source $PROJECT_PATH/service_conf
     LOAD_CONFIG_VAR=1
+    
 
     # set basic service conf
     SERVICE_NAME_VAR=$SERVICE_NAME
@@ -249,4 +257,49 @@ fi
 if [ $REQUEST_VAR == 1 ]; then
     # do a test call for this service daemon
     callService
+fi
+
+################################################
+# -------------------------------------------- #
+# ----- INSTALL ALL DEPS FOR THIS SERVICE ---- #
+# -------------------------------------------- #
+################################################
+
+if [ $INSTALL_VAR == 1 ]; then
+    apt-get update;\
+    apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+                       libgflags-dev libgtest-dev clang libc++-dev git curl nano \
+                       wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
+
+    # try upgrade pip
+    pip install --upgrade pip; \
+
+    # install GRPC
+    cd /;\
+    git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
+    cd grpc; \
+    git submodule update --init; \
+    make; \
+    make install; \
+    cd third_party/protobuf; \
+    make install; \
+    cd /;\
+
+    # install daemon
+    mkdir snet-daemon; \
+    cd snet-daemon; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.5-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
+    cd ..; \
+    rm -rf snet-daemon; \
+
+    # install cli
+    cd /opt; \
+    git clone https://github.com/singnet/snet-cli; \
+    cd snet-cli; \
+    ./scripts/blockchain install; \
+    pip3 install -e .; \
+    cd $PROJECT_PATH 
+
 fi
