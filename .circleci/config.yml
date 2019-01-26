@@ -14,10 +14,10 @@ defaults: &defaults
     GIT_OWNER: singnet
     SERVICE_DAEMON_PORT: 7090
 
-    PROD_DOCKER_IMAGE_NAME: prod_alysson_time_series_anomaly_discovery
-    PROD_DOCKER_CONTAINER_NAME: PROD_ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY
-    STAGING_DOCKER_IMAGE_NAME: alysson_time_series_anomaly_discovery_staging
-    STAGING_DOCKER_CONTAINER_NAME: ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY_STAGING
+    PROD_DOCKER_IMAGE_NAME: prod_alysson_time_series_anomaly_discovery:latest
+    PROD_DOCKER_CONTAINER_NAME: PROD_ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY:latest
+    STAGING_DOCKER_IMAGE_NAME: alysson_time_series_anomaly_discovery_staging:latest
+    STAGING_DOCKER_CONTAINER_NAME: ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY_STAGING:latest
       
 version: 2
 jobs:
@@ -36,7 +36,7 @@ jobs:
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             docker stop $STAGING_DOCKER_CONTAINER_NAME || true
             docker rm $STAGING_DOCKER_CONTAINER_NAME || true
-            docker run -td --name $STAGING_DOCKER_CONTAINER_NAME $STAGING_DOCKER_IMAGE_NAME
+            docker run -tdi --name $STAGING_DOCKER_CONTAINER_NAME $STAGING_DOCKER_IMAGE_NAME
           EOF
     - run:
         name: Deploy service
