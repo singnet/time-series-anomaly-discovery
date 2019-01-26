@@ -84,6 +84,9 @@ TEST_CALL_METHOD_VAR=
 # this script's path
 PROJECT_PATH="$(dirname "$0")"
 
+# ensure to operate inside the service root path
+cd $PROJECT_PATH
+
 # try to load config file
 if [ -f "$PROJECT_PATH/service_conf" ]; then
     # setup input parameters
