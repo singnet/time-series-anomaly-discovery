@@ -22,13 +22,6 @@ This repository contains the [C++ service][cpp-tutorial] for Grammar-Based Compr
 
 # Dependencies
 
-This source was tested on Ubuntu 18.04 and it depends primarily on the following packages.
-
-```
-nlohmann-json-dev 
-grpc
-```
-
 In order to install all the recommended packages to handle this service run the following command.
 
 ```
@@ -136,7 +129,7 @@ snetd --config snetd.config.json &
 </p></details>
 
 
-The daemon and the GRPC are initially configurated to listen at 0.0.0.0:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
+The daemon and the GRPC are initially configurated to listen at 54.203.198.53:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
 
 ## Publishing
 
