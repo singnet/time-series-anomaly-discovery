@@ -20,6 +20,61 @@
 
 This repository contains the [C++ service][cpp-tutorial] for Grammar-Based Compression Time Series Anomaly Discovery.
 
+# Dependencies
+
+This source was tested on Ubuntu 18.04 and it depends primarily on the following packages.
+
+```
+nlohmann-json-dev 
+grpc
+```
+
+In order to install all the recommended packages to handle this service run the following command.
+
+```
+sudo ./setup.sh -i
+```
+
+<details><summary>Click here to see the commands called by './setup.sh -i'</summary><p>
+    
+```
+apt-get update;\
+apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+                   libgflags-dev libgtest-dev clang libc++-dev git curl nano \
+                   wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
+
+# try upgrade pip
+pip install --upgrade pip; \
+
+# install GRPC
+cd /;\
+git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
+cd grpc; \
+git submodule update --init; \
+make; \
+make install; \
+cd third_party/protobuf; \
+make install; \
+cd /;\
+
+# install daemon
+mkdir snet-daemon; \
+cd snet-daemon; \
+wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
+tar -xvf snet-daemon-v0.1.5-linux-amd64.tar.gz; \
+mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
+cd ..; \
+rm -rf snet-daemon; \
+
+# install cli
+cd /opt; \
+git clone https://github.com/singnet/snet-cli; \
+cd snet-cli; \
+./scripts/blockchain install; \
+pip3 install -e .; \
+```
+</p></details>
+
 ## Getting Started
 
 This service allows to detect anomalies in time series as accomplished by [[1]](#anomalies_detection_general), based on grammar compression. It contains [SingularityNet][singularitynet-home] implementation of the following algorithms and methods.
@@ -38,7 +93,7 @@ For a detailed explanation about how this service works see the [users guide][us
 
 ## Compile
 
-To compile this project's source and perform integration tests, run one of the following commands in the project's root directory.
+To compile this project's source and perform integration tests, run one the following command in the project's root directory.
 
 ```
 ./setup.sh -c
@@ -91,6 +146,9 @@ To publish this service call the following.
 ./setup.sh -p
 ```
 
+Just remember that in order to publish the service, an identity must be created.
+
+
 <details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
 ```
@@ -106,7 +164,7 @@ snet service metadata-set-fixed-price $PRICE_VAR
 # set the local port to access this service server
 snet service metadata-add-endpoints https://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
 
-# publish the service at the especified organization
+# publish the service at the specified organization
 snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 ```
 </p></details>
@@ -152,6 +210,17 @@ echo
 
 
 This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file].
+
+## Building docker ready image
+
+In order to build and run a docker ready image for this service use the command described bellow.
+
+```
+docker build -t times-series-anomaly-discovery:dev .
+docker run -tdi --name time-series-anomaly-discovery-container times-series-anomaly-discovery:dev
+docker exec -it time-series-anomaly-discovery-container /bin/bash
+```
+
 
 ## Contributing and Reporting Issues
 
