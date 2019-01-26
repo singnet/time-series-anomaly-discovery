@@ -28,7 +28,7 @@ jobs:
         name: Build docker image
         command: |
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
-            docker image build -t $STAGING_DOCKER_IMAGE_NAME https://raw.githubusercontent.com/$GIT_OWNER/$REPOSITORY/$BRANCH/Dockerfile
+            docker image build --no-cache -t $STAGING_DOCKER_IMAGE_NAME https://raw.githubusercontent.com/$GIT_OWNER/$REPOSITORY/$BRANCH/Dockerfile
           EOF
     - run:
         name: Start and perform integration tests
