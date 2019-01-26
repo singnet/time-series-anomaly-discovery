@@ -4,9 +4,12 @@ defaults: &defaults
   working_directory: ~/singnet
   environment:
 
+    ORG: singnet
+    DOCKER_ORG: singularitynet
+
     SERVICE_NAME: TSAD
-    AUTHOR: ALYSSON
-    REPOSITORY: TSAD-service
+    AUTHOR: Alysson Ribeiro da Silva
+    REPOSITORY: time-series-anomaly-discovery
     BRANCH: master
     GIT_OWNER: singnet
     SERVICE_DAEMON_PORT: 7090
