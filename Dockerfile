@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 
 # working directory
 ENV SERVICE_CORE=/home/ubuntu/service
-ENV REPO_NAME=TSAD-service
+ENV REPO_NAME=time-series-anomaly-discovery
 
 # make folders
 RUN mkdir -p ${SERVICE_CORE}
@@ -44,6 +44,6 @@ RUN cd /opt; \
 
 # clone service project from git
 RUN cd ${SERVICE_CORE}; \
-    git clone https://github.com/Ophien/TSAD-service.git
+    git clone https://github.com/singnet/time-series-anomaly-discovery.git
 
 CMD ["/bin/sh", "-c", "${SERVICE_CORE}/${REPO_NAME}/setup.sh -r"]

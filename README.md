@@ -22,7 +22,7 @@ This repository contains the [C++ service][cpp-tutorial] for Grammar-Based Compr
 
 # Dependencies
 
-In order to install all the recommended packages to handle this service run the following command.
+In order to install all the recommended packages to handle this service run the following command in the project's root directory.
 
 ```
 sudo ./setup.sh -i
@@ -131,13 +131,13 @@ snetd --config snetd.config.json &
 
 ## Publishing
 
-To publish this service call the following.
+To publish variants of this service, call the following.
 
 ```
 ./setup.sh -p
 ```
 
-This command will publish the service with the specified information located at the [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish the service, an identity must be created.
+This command will publish the service with the specified information in [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish a service, you need a valid identity and [service configuration file][service_confi_file].
 
 <details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
@@ -159,15 +159,16 @@ snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 ```
 </p></details>
 
-## Performing a deployment test
+## Performing a test request
 
-To perform a deploy test, run the following command.
+To perform a test request, run the following command.
 
 ```
 ./setup.sh -e
 ```
 
-This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file].
+This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file]. 
+
 
 <details><summary>Click here to see the commands called by './setup.sh -e'</summary><p>
     
@@ -199,13 +200,20 @@ echo
 
 ## Docker image
 
-In order to build and run a docker image for this service use the command described bellow.
+In order to build a docker image and run a container for this service, use the commands described bellow in the project's root directory.
 
 ```
-docker build -t times-series-anomaly-discovery:dev .
-docker run -tdi --name time-series-anomaly-discovery-container times-series-anomaly-discovery:dev
-docker exec -it time-series-anomaly-discovery-container /bin/bash
+# build the docker image
+docker build -t times-series-anomaly--image:dev .
+
+# run the container and service
+docker run -tdi --name time-series-anomaly-discovery-container times-series-anomaly-discovery-image:dev
+
+# enter the container
+docker exec -it time-series-anomaly-discovery-container /bin/bashdiscovery
 ```
+
+The name given to the image and container could be changed according to the user's necessity.
 
 ## Contributing and Reporting Issues
 
