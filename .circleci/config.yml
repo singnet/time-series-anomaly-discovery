@@ -11,7 +11,7 @@ defaults: &defaults
     AUTHOR: Alysson Ribeiro da Silva
     REPOSITORY: time-series-anomaly-discovery
     BRANCH: master
-    GIT_OWNER: Ophien
+    GIT_OWNER: singnet
     SERVICE_DAEMON_PORT: 7090
 
     PROD_DOCKER_IMAGE_NAME: prod_alysson_time_series_anomaly_discovery

@@ -44,6 +44,6 @@ RUN cd /opt; \
 
 # clone service project from git
 RUN cd ${SERVICE_CORE}; \
-    git clone https://github.com/Ophien/time-series-anomaly-discovery.git
+    git clone https://github.com/singnet/time-series-anomaly-discovery.git
 
 CMD ["/bin/sh", "-c", "${SERVICE_CORE}/${REPO_NAME}/setup.sh -r"]
