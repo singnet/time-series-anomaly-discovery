@@ -4,15 +4,15 @@
 [singularitynet-home]: https://www.singularitynet.io
 [contribution-guidelines]: https://github.com/singnet/wiki/blob/master/guidelines/CONTRIBUTING.md
 [cpp-tutorial]: https://github.com/singnet/wiki/tree/master/tutorials/howToWriteCPPService
-[setup-script]: https://github.com/Ophien/TSAD-service/blob/master/setup.sh
-[service_confi_file]: https://github.com/Ophien/TSAD-service/blob/master/service_conf
+[setup-script]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/setup.sh
+[service_confi_file]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/service_conf
 
-[sequitur_docs]: https://github.com/Ophien/TSAD-service/blob/master/docs/sequitur.md
-[sax_docs]: https://github.com/Ophien/TSAD-service/blob/master/docs/sax.md
-[paa_docs]: https://github.com/Ophien/TSAD-service/blob/master/docs/paa.md
-[densitycurve_docs]: https://github.com/Ophien/TSAD-service/blob/master/docs/densitycurve.md
-[erdb_docs]: https://github.com/Ophien/TSAD-service/blob/master/docs/erdb.md
-[users_guide]: https://github.com/Ophien/TSAD-service/blob/master/docs/usersguide.md
+[sequitur_docs]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/sequitur.md
+[sax_docs]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/sax.md
+[paa_docs]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/paa.md
+[densitycurve_docs]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/densitycurve.md
+[erdb_docs]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/erdb.md
+[users_guide]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/usersguide.md
 
 [![CircleCI](https://circleci.com/gh/singnet/time-series-anomaly-discovery.svg?style=svg)](https://circleci.com/gh/singnet/time-series-anomaly-discovery)
 
