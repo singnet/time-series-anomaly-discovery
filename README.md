@@ -20,24 +20,25 @@
 
 # Time Series Anomaly Discovery Service to SingularityNET
 
-A [SingularityNET][singularitynet-home] service is composed of three main pilars as depicted in Figure 1. Those are the DAEMON, GRPC server, and the service. The Daemon is responsible to receive requests from users, usually through the internet, and send them to the local service GRPC server. The server will call the service locally and return a response to the DAEMON. This response is sent by the DAEMON to the caller user as the service processed information.
+This project contains a [C++ service][cpp-tutorial] to discover time series anomalies in real-time.
 
-<p align="center">
- <img src="docs/assets/service-diagram.jpg" alt="drawing" width="512"/>
-</p>
+This service allows to detect anomalies in time series as accomplished by [[1]](#anomalies_detection_general), based on grammar compression. It contains [SingularityNet][singularitynet-home] implementation of the following algorithms and methods.
 
-<p align="center">
-  Figure 1 - Service architecture and communication between an user, daemon, and GRPC server.
-</p>
+[Symbolic Aggregate Approximation](#sax) - Discretization method for continuous signals [[2]](#sax).
 
-*<strong>It is important to note that operations performed by the DAEMON may interact with the blockchain and have a price associated with it.</strong>*
+[Piecewise Aggregate Approximation](#paa) - Series approximation and reduction method [[3]](#paa).
 
-Simply put, this project contains a [C++ service][cpp-tutorial] to discover time series anomalies in real-time. It was tested on Ubuntu 18.04 and requires at least the C++ GRPC library and the DAMEON installed to be built and executed. 
+[Sequitur](#sequitur) - Context Free Grammar Generator [[4]](#sequitur).
 
-Table of contents
+[Density Curve](#anomalies_detection_general) - Density curve generator based on context free grammar rules [[1]](#anomalies_detection_general).
+
+[Efficient, rule density-based anomaly discovery](#anomalies_detection_general) - Detect anomalies on a generated density curve, based on a hill-climbing inspired algorithm [[1]](#anomalies_detection_general).
+
+For a detailed explanation about how this service works see the [users guide][users_guide] and [Sigularity Net Service Tutorial][singnet_service_tutorial].
+
+## Table of contents
 
 <!--ts-->
-   * [Dependencies](#Dependencies)
    * [Getting Started](#getting-started)
    * [Building](#building)
    * [Running](#running)
@@ -50,9 +51,9 @@ Table of contents
    * [License](#license)
 <!--te-->
 
-# Dependencies
+## Getting Started
 
-For the sake of simplicity, this service provides a 'setup.sh' script. This script can be used to install all dependencies, compile the source, perform tests, run the service, and publish it.
+For the sake of simplicity, this service provides a 'setup.sh' script. This script can be used to install all dependencies, compile the source, perform tests, run the service, and publish it. This service source was tested on Ubuntu 18.04 and requires at least the C++ GRPC library and the DAMEON installed to be built and executed. 
 
 In order to install all dependencies, use the following command.
 
@@ -105,22 +106,6 @@ pip3 install -e .; \
 ```
 </p></details>
 
-## Getting Started
-
-This service allows to detect anomalies in time series as accomplished by [[1]](#anomalies_detection_general), based on grammar compression. It contains [SingularityNet][singularitynet-home] implementation of the following algorithms and methods.
-
-[Symbolic Aggregate Approximation][sax_docs] - Discretization method for continuous signals [[2]](#sax).
-
-[Piecewise Aggregate Approximation][paa_docs] - Series approximation and reduction method [[3]](#paa).
-
-[Sequitur][sequitur_docs] - Context Free Grammar Generator [[4]](#sequitur).
-
-[Density Curve][densitycurve_docs] - Density curve generator based on context free grammar rules [[1]](#anomalies_detection_general).
-
-[Efficient, rule density-based anomaly discovery][erdb_docs] - Detect anomalies on a generated density curve, based on a hill-climbing inspired algorithm [[1]](#anomalies_detection_general).
-
-For a detailed explanation about how this service works see the [users guide][users_guide].
-
 ## Building
 
 To build this project's source and perform tests, run the following command in the project's root directory.
@@ -145,7 +130,7 @@ make clean; make
 
 ## Running
 
-In order to build and get this service running, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, the localhost GRPC server, and the DAEMON to handle requests to this service.
+In order to build and get this service running, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
 
 
 ```
@@ -259,7 +244,7 @@ submitting issues or pull requests.
 
 [Alysson Ribeiro da Silva][author-home] - *Maintainer* - [SingularityNET][singularitynet-home]
 
-### References
+## References
 
 <a name=anomalies_detection_general>[1]</a> Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., & Frankenstein, S. (2015). Time series anomaly     discovery with grammar-based compression. EDBT.
 
