@@ -57,7 +57,7 @@ jobs:
               echo "Image created"
               echo
               echo "Starting service container"
-              docker run -di --restart unless-stopped -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT --name $PROD_DOCKER_CONTAINER_NAME $PROD_DOCKER_IMAGE_NAME
+              docker run -tdi -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT --name $PROD_DOCKER_CONTAINER_NAME $PROD_DOCKER_IMAGE_NAME
               echo "Container started"
               echo
             else
