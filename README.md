@@ -16,7 +16,6 @@
 
 [singnet_service_tutorial]:https://dev.singularitynet.io/tutorials/publish/
 
-
 [![CircleCI](https://circleci.com/gh/singnet/time-series-anomaly-discovery.svg?style=svg)](https://circleci.com/gh/singnet/time-series-anomaly-discovery)
 
 # Time Series Anomaly Discovery Service to SingularityNET
