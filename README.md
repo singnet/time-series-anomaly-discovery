@@ -20,7 +20,7 @@
 
 # Time Series Anomaly Discovery Service to SingularityNET
 
-A [SingularityNET][singularitynet-home] service is composed of three main pilars as depicted in Figure 1. Those are the DAEMON, GRPC server, and the service. The Daemon is responsible to receive external requests from users, usually through the internet, and send them to the local service GRPC server. The server will call the service locally and return a response to the DAEMON. This response is sent by the DAEMON to the caller user as the service processed information.
+A [SingularityNET][singularitynet-home] service is composed of three main pilars as depicted in Figure 1. Those are the DAEMON, GRPC server, and the service. The Daemon is responsible to receive requests from users, usually through the internet, and send them to the local service GRPC server. The server will call the service locally and return a response to the DAEMON. This response is sent by the DAEMON to the caller user as the service processed information.
 
 <p align="center">
  <img src="docs/assets/service-diagram.jpg" alt="drawing" width="512"/>
@@ -30,7 +30,7 @@ A [SingularityNET][singularitynet-home] service is composed of three main pilars
   Figure 1 - Service architecture and communication between an user, daemon, and GRPC server.
 </p>
 
-*<strong>It is important to note that operations performed by the DAEMON may interact with the blockchain and has a price associated with it.</strong>*
+*<strong>It is important to note that operations performed by the DAEMON may interact with the blockchain and have a price associated with it.</strong>*
 
 Simply put, this project contains a [C++ service][cpp-tutorial] to discover time series anomalies in real-time. It was tested on Ubuntu 18.04 and requires at least the C++ GRPC library and the DAMEON installed to be built and executed. 
 
@@ -177,7 +177,7 @@ To publish variants of this service, call the following.
 ./setup.sh -p
 ```
 
-This command will publish the service with the specified information in [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish a service, you firstly need a valid identity and [service configuration file][service_confi_file].
+This command will publish the service with the specified information in [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish a service, you firstly need a valid identity and [service configuration file][service_confi_file]. We higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about the publication process.
 
 <details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
@@ -206,11 +206,11 @@ To perform a test request, run the following command.
 ```
 ./setup.sh -e
 ```
-This will do a request to this service DAEMON, already published at snet, with the default input parameter at the DAEMON address specified in the [service configuration file][service_confi_file].
+This will do a request to this service DAEMON, already published at snet, with the default input parameter and DAEMON address specified in the [service configuration file][service_confi_file].
 
 *A call for this service is free, however in order for this to work you need to have a valid identity/account.*
 
-For more info regargind service calls, publication, DAEMON working, and how to create identities/accounts, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
+For more info regarding service calls, publication, DAEMON, how to create identities/accounts, and the blockchain, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
 
 <details><summary>Click here to see the commands called by './setup.sh -e'</summary><p>
     
@@ -241,20 +241,14 @@ echo
 </p></details>
 
 ## Docker
-This project also provides a Dockerfile to allow to create docker images for this service. The commands bellow can be used to build an image and run a container based on it.
+This project also provides a Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build an image.
 
 ```
 # build the docker image
 docker build -t times-series-anomaly--image:dev .
-
-# run the container and service
-docker run -tdi --name time-series-anomaly-discovery-container times-series-anomaly-discovery-image:dev
-
-# enter the container
-docker exec -it time-series-anomaly-discovery-container /bin/bashdiscovery
 ```
 
-The name given to the image and container could be changed according to the user's necessity.
+For more info regarding service calls and how to configure docker to run your services, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
 
 ## Contributing and Reporting Issues
 
