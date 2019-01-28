@@ -14,24 +14,61 @@
 [erdb_docs]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/erdb.md
 [users_guide]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/usersguide.md
 
+[singnet_service_tutorial]:https://dev.singularitynet.io/tutorials/publish/
+
 [![CircleCI](https://circleci.com/gh/singnet/time-series-anomaly-discovery.svg?style=svg)](https://circleci.com/gh/singnet/time-series-anomaly-discovery)
 
 # Time Series Anomaly Discovery Service to SingularityNET
 
-This repository contains the [C++ service][cpp-tutorial] for Grammar-Based Compression Time Series Anomaly Discovery.
+A [SingularityNET][singularitynet-home] service is composed of three main pilars as depicted in Figure 1. Those are the DAEMON, GRPC server, and the service. The Daemon is responsible to receive external requests from users, usually through the internet, and send them to the local service GRPC server. The server will call the service locally and return a response to the DAEMON. This response is sent by the DAEMON to the caller user as the service processed information.
+
+<p align="center">
+ <img src="docs/assets/service-diagram.jpg" alt="drawing" width="512"/>
+</p>
+
+<p align="center">
+  Figure 1 - Service architecture and communication between an user, daemon, and GRPC server.
+</p>
+
+*<strong>It is important to note that operations performed by the DAEMON may interact with the blockchain and has a price associated with it.</strong>*
+
+Simply put, this project contains a [C++ service][cpp-tutorial] to discover time series anomalies in real-time. It was tested on Ubuntu 18.04 and requires at least the C++ GRPC library and the DAMEON installed to be built and executed. 
+
+Table of contents
+
+<!--ts-->
+   * [Dependencies](#Dependencies)
+   * [Getting Started](#getting-started)
+   * [Building](#building)
+   * [Running](#running)
+   * [Publishing](#publishing)
+   * [Perfoming a Test Request](#performing-a-test-request)
+   * [Docker](#docker)
+   * [Contributing and Reporting Issues](#contributing-and-reporting-issues)
+   * [Author](#author)
+   * [References](#references)
+   * [License](#license)
+<!--te-->
 
 # Dependencies
 
-In order to install all the recommended packages to handle this service run the following command in the project's root directory.
+For the sake of simplicity, this service provides a 'setup.sh' script. This script can be used to install all dependencies, compile the source, perform tests, run the service, and publish it.
+
+In order to install all dependencies, use the following command.
 
 ```
 sudo ./setup.sh -i
 ```
 
+Basically, this command will install the GRPC c++ library, the DAEMON to handle requests, and the snet cli to manage the blockchain related stuff.
+
 <details><summary>Click here to see the commands called by './setup.sh -i'</summary><p>
     
 ```
+# update packages list
 apt-get update;\
+
+# try to install all recommended software
 apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
                    libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                    wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
@@ -39,7 +76,7 @@ apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config
 # try upgrade pip
 pip install --upgrade pip; \
 
-# install GRPC
+# install GRPC library
 cd /;\
 git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
 cd grpc; \
@@ -50,7 +87,7 @@ cd third_party/protobuf; \
 make install; \
 cd /;\
 
-# install daemon
+# install snet daemon to call for services
 mkdir snet-daemon; \
 cd snet-daemon; \
 wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
@@ -59,7 +96,7 @@ mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
 cd ..; \
 rm -rf snet-daemon; \
 
-# install cli
+# install cli to handle services publishing and other related operations
 cd /opt; \
 git clone https://github.com/singnet/snet-cli; \
 cd snet-cli; \
@@ -84,9 +121,10 @@ This service allows to detect anomalies in time series as accomplished by [[1]](
 
 For a detailed explanation about how this service works see the [users guide][users_guide].
 
-## Compile
+## Building
 
-To compile this project's source and perform integration tests, run the following command in the project's root directory.
+To build this project's source and perform tests, run the following command in the project's root directory.
+
 
 ```
 ./setup.sh -c
@@ -107,13 +145,14 @@ make clean; make
 
 ## Running
 
-In order to compile and get this service running locally, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, run integration tests, the localhost GRPC server, and the daemon to handle requests to this service.
+In order to build and get this service running, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, the localhost GRPC server, and the DAEMON to handle requests to this service.
+
 
 ```
 ./setup.sh -r
 ```
 
-The daemon and the GRPC are initially configurated to listen at 54.203.198.53:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
+It is important to note that the DAEMON listen to outside requests and the GRPC will only listen requests at the localhost address. Both are initially configurated to listen at 54.203.198.53:7090 and 0.0.0.0:7055, respectively. For more info about how to configure the service see the [service configuration file][service_confi_file].
 
 <details><summary>Click here to see the commands called by './setup.sh -r'</summary><p>
     
@@ -133,11 +172,12 @@ snetd --config snetd.config.json &
 
 To publish variants of this service, call the following.
 
+
 ```
 ./setup.sh -p
 ```
 
-This command will publish the service with the specified information in [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish a service, you need a valid identity and [service configuration file][service_confi_file].
+This command will publish the service with the specified information in [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish a service, you firstly need a valid identity and [service configuration file][service_confi_file].
 
 <details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
@@ -166,9 +206,11 @@ To perform a test request, run the following command.
 ```
 ./setup.sh -e
 ```
+This will do a request to this service DAEMON, already published at snet, with the default input parameter at the DAEMON address specified in the [service configuration file][service_confi_file].
 
-This will call the daemon for this service with the default input parameter to the service. Both, daemon port and service input parameter, are specified in the [service configuration file][service_confi_file]. 
+*A call for this service is free, however in order for this to work you need to have a valid identity/account.*
 
+For more info regargind service calls, publication, DAEMON working, and how to create identities/accounts, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
 
 <details><summary>Click here to see the commands called by './setup.sh -e'</summary><p>
     
@@ -198,9 +240,8 @@ echo
 ```
 </p></details>
 
-## Docker image
-
-In order to build a docker image and run a container for this service, use the commands described bellow in the project's root directory.
+## Docker
+This project also provides a Dockerfile to allow to create docker images for this service. The commands bellow can be used to build an image and run a container based on it.
 
 ```
 # build the docker image
