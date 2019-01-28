@@ -37,7 +37,7 @@ using namespace timeSeries;
 
 static bool saxWordGenerationUnitTest(std::vector<double> &rInSeries,
                                       const int slidingWindowRange,
-                                      const int ppaSize,
+                                      const int paaSize,
                                       std::vector<std::string> &rInAlphabet,
                                       const char* pInExpectedOutput)
 {
@@ -46,7 +46,7 @@ static bool saxWordGenerationUnitTest(std::vector<double> &rInSeries,
     // generate a sax word given a sliding window
     int start = 0;
     int range = slidingWindowRange;
-    int ppa_size = ppaSize;
+    int paa_size = paaSize;
     std::string word = "";
 
     std::vector<double> znormed_series;
@@ -60,13 +60,13 @@ static bool saxWordGenerationUnitTest(std::vector<double> &rInSeries,
     for (int word_start_index = 0; word_start_index < rInSeries.size(); word_start_index += range)
     {
         // compute sax word
-        word = sax.sax(ppa_size, word_start_index, word_start_index + range);
+        word = sax.sax(paa_size, word_start_index, word_start_index + range);
 
         // print generated sax word
-        printf("Generated sax word for the subsequence starting at %d and ending at %d with ppa reduction size equals to %d: %s\n",
+        printf("Generated sax word for the subsequence starting at %d and ending at %d with paa reduction size equals to %d: %s\n",
                word_start_index,
                word_start_index + range,
-               ppa_size,
+               paa_size,
                word.c_str());
     }
 
@@ -76,7 +76,7 @@ static bool saxWordGenerationUnitTest(std::vector<double> &rInSeries,
 
 static bool saxWordGenerationSlidingWindowUnitTest(std::vector<double> &rInSeries,
                                                    const int slidingWindowRange,
-                                                   const int ppaSize,
+                                                   const int paaSize,
                                                    std::vector<std::string> &rInAlphabet,
                                                    const char* pInExpectedOutput)
 {
@@ -85,7 +85,7 @@ static bool saxWordGenerationSlidingWindowUnitTest(std::vector<double> &rInSerie
     // generate a sax word given a sliding window
     int start = 0;
     int range = slidingWindowRange;
-    int ppa_size = ppaSize;
+    int paa_size = paaSize;
     std::string word = "";
 
     for (int word_start_index = 0; word_start_index + slidingWindowRange < rInSeries.size(); word_start_index += 1)
@@ -102,13 +102,13 @@ static bool saxWordGenerationSlidingWindowUnitTest(std::vector<double> &rInSerie
         SymbolicAggregateApproximation sax(rInAlphabet, znormed_subsequence);
 
         // compute sax word
-        word = sax.sax(ppa_size);
+        word = sax.sax(paa_size);
 
         // print generated sax word
-        printf("Generated sax word for the subsequence starting at %d and ending at %d with ppa reduction size equals to %d: %s\n",
+        printf("Generated sax word for the subsequence starting at %d and ending at %d with paa reduction size equals to %d: %s\n",
                word_start_index,
                word_start_index + range,
-               ppa_size,
+               paa_size,
                word.c_str());
     }
 

@@ -20,13 +20,13 @@ using grpc::ServerWriter;
 using grpc::Status;
 
 // PROTO_TYPES
-using timeSeriesAnomalyDetection::ServiceDefinition;
 using timeSeriesAnomalyDetection::InputParameters;
 using timeSeriesAnomalyDetection::OutputString;
+using timeSeriesAnomalyDetection::EfficientRuleDensityBasedAnomalyDetection;
 
 using namespace timeSeries;
 
-class ServiceImpl final : public ServiceDefinition::Service
+class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Service
 {
 
   public:
@@ -38,7 +38,7 @@ class ServiceImpl final : public ServiceDefinition::Service
                    std::vector<double> &rOutTimeSeries,
                    std::vector<std::string> &rOutAlphabet,
                    int &rOutSlidingWindowRange,
-                   int &rOutPpaSize,
+                   int &rOutpaaSize,
                    bool &rOutDebugStatus)
     {     
         // build up time series from arg 0
@@ -60,27 +60,27 @@ class ServiceImpl final : public ServiceDefinition::Service
         // get sliding window range
         rOutSlidingWindowRange = atof(pInInputArgs->slidingwindowsize().c_str());
 
-        // get ppa size
-        rOutPpaSize = atof(pInInputArgs->ppasize().c_str());
+        // get paa size
+        rOutpaaSize = atof(pInInputArgs->paasize().c_str());
 
         // get debug status
         rOutDebugStatus = atoi(pInInputArgs->debugflag().c_str());
     }
 
     // SERVICE_API
-    Status run(ServerContext *context, const InputParameters *pInInput, OutputString *pOutput) override
+    Status detectAnomalies(ServerContext *context, const InputParameters *pInInput, OutputString *pOutput) override
     {
         std::vector<double> time_series;
         std::vector<std::string> alphabet;
         int sliding_window_range;
-        int ppa_size;
+        int paa_size;
         bool debug_status;
 
         // get arguments from input
-        buildArgs(pInInput, time_series, alphabet, sliding_window_range, ppa_size, debug_status);
+        buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, debug_status);
 
         // create an anomaly discovery object
-        ErdbAnomalyDiscovery anomaly_discovery(alphabet, sliding_window_range, ppa_size);
+        ErdbAnomalyDiscovery anomaly_discovery(alphabet, sliding_window_range, paa_size);
 
         // insert received time series into this anomaly detector
         anomaly_discovery.insertTimeSeries(time_series);

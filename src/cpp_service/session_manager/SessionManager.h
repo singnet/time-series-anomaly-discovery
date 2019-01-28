@@ -40,7 +40,7 @@ class SessionManager
     SessionManager();
     ~SessionManager();
 
-    int startSession(std::vector<std::string> &rInAlphabet, const int slidingWindow, const int ppaSize);
+    int startSession(std::vector<std::string> &rInAlphabet, const int slidingWindow, const int paaSize);
     void insertSample(const int sessionId, const double sample);
     void endSession(const int sessionId);
     void getAnomalies(const int sessionId, std::string &rOutOutputString, std::vector<int> &rOutDetectedAnomalies);

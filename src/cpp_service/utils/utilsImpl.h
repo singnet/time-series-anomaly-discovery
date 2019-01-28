@@ -33,6 +33,9 @@
 namespace timeSeries
 {
 
+/**
+  * Calculate the mean between a start proint and range from
+  * a given subsequence. */
 template <class vecType, class returnType>
 returnType mean(std::vector<vecType> &rInSubSequence, const int start, const int range)
 {
@@ -46,6 +49,9 @@ returnType mean(std::vector<vecType> &rInSubSequence, const int start, const int
     return sum / (returnType)range;
 }
 
+/**
+  * Calculate the standard deviation between a start proint 
+  * and range from a given subsequence and its mean. */
 template <class vecType, class returnType>
 returnType standardDeviation(const returnType mean, std::vector<vecType> &rInSubSequence, const int start, const int range)
 {
