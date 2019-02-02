@@ -1,6 +1,7 @@
-SERVICE_NAME="TSAD"
+REPOSITORY_NAME="time-series-anomaly-discovery"
+SERVICE_NAME="time-series-anomaly-discovery"
 WALLET="0xfe98f73A11f4fBc5623B0Aa966522fe016A82487"
-PRICE=0.00000000
+PRICE=0.00000001
 
 # network
 SERVICE_SERVER_PORT=7055
@@ -17,8 +18,8 @@ REGISTRY_KEY="0xe331bf20044a5b24c1a744abc90c1fd711d2c08d"
 DEPLOY_TEST_CALL_INPUT="{\"timeseries\":\"1 1 1 1 1 300 1 1 1 1 1 300 1 1 1 1 1 300 1 1 1 1 1 1 300\", \
                   \"alphabet\":\"a b c d e f\", \
                   \"slidingwindowsize\":\"10\",
-                  \"ppasize\":\"2\",
+                  \"paasize\":\"2\",
                   \"debugflag\":\"0\"}"
 
 # function to call
-DEPLOY_TEST_CALL_METHOD=run
+DEPLOY_TEST_CALL_METHOD=detectAnomalies

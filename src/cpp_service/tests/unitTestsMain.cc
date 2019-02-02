@@ -13,15 +13,15 @@ int main(int argc, char *argv[])
     double amplitude = 20.0;
     double phase = 0.0;
     int samples = 90;
-    int ppa_size = 3;
+    int paa_size = 3;
     int sliding_window_size = 9;
     std::vector<std::string> alphabet = {"a", "b", "c"};
     std::vector<double> senoid_time_series;
     generateSenoidSeries(senoid_time_series, samples, frequency, amplitude, phase);
 
-    result = saxWordGenerationUnitTest(senoid_time_series, sliding_window_size, ppa_size, alphabet, "");
-    result = saxWordGenerationSlidingWindowUnitTest(senoid_time_series, sliding_window_size, ppa_size, alphabet, "");
-    result = sequiturGrammarGenerationUnitTest(senoid_time_series, sliding_window_size, ppa_size, alphabet, "");
-    result = densityCurveGenerationSlidingWindowUnitTest(senoid_time_series, sliding_window_size, ppa_size, alphabet, "");
-    result = anomalyDiscoveryErdbUnitTest(senoid_time_series, sliding_window_size, ppa_size, alphabet, "");
+    result = saxWordGenerationUnitTest(senoid_time_series, sliding_window_size, paa_size, alphabet, "");
+    result = saxWordGenerationSlidingWindowUnitTest(senoid_time_series, sliding_window_size, paa_size, alphabet, "");
+    result = sequiturGrammarGenerationUnitTest(senoid_time_series, sliding_window_size, paa_size, alphabet, "");
+    result = densityCurveGenerationSlidingWindowUnitTest(senoid_time_series, sliding_window_size, paa_size, alphabet, "");
+    result = anomalyDiscoveryErdbUnitTest(senoid_time_series, sliding_window_size, paa_size, alphabet, "");
 }

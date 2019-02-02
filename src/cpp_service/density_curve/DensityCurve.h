@@ -101,7 +101,6 @@ class DensityCurve
     std::vector<std::string> _seriesWords; ///< Stores the time series words
     std::vector<int> _density; ///< Stores the densities for each word
 
-    // statistics
     std::vector<int> _localMinPoints; ///< local minimum intervals
     std::vector<int> _localMaxPoints; ///< local maximum intervals
     std::vector<int> _globalMaxPoints; ///< global maximum intervals

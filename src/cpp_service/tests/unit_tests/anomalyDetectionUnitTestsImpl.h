@@ -36,14 +36,14 @@ using namespace timeSeries;
 
 static bool anomalyDiscoveryErdbUnitTest(std::vector<double> &rInSeries,
                                          const int slidingWindowRange,
-                                         const int ppaSize,
+                                         const int paaSize,
                                          std::vector<std::string> &rInAlphabet,
                                          const char* pInExpectedOutput)
 {
     printf("\n\nEfficient rule-density anomaly discovery unit test...\n\n");
 
     // create an anomaly discovery object
-    ErdbAnomalyDiscovery anomaly_discovery(rInAlphabet, slidingWindowRange, ppaSize);
+    ErdbAnomalyDiscovery anomaly_discovery(rInAlphabet, slidingWindowRange, paaSize);
 
     // iterate over the provided time series
     for (unsigned int sample = 0; sample < rInSeries.size(); sample++)

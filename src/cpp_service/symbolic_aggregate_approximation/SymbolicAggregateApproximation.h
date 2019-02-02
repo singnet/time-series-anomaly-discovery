@@ -56,7 +56,7 @@ class SymbolicAggregateApproximation
 
     /**
       * Compute the sax word of a subsequence for the specified z-normalized time series. 
-      * It received the ppaSize variable since it used the PAA algorithm to reduce the
+      * It receives the paaSize variable since it used the PAA algorithm to reduce the
       * dimensionality of the time series. */
     std::string sax(const int ppaSize, const int start = -1, const int range = -1);
 

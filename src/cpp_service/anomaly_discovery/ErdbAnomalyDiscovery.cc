@@ -7,10 +7,10 @@
 
 using namespace timeSeries;
 
-ErdbAnomalyDiscovery::ErdbAnomalyDiscovery(std::vector<std::string> &rInSaxAlphabet, const int slidingWindowSize, const int ppaSize)
+ErdbAnomalyDiscovery::ErdbAnomalyDiscovery(std::vector<std::string> &rInSaxAlphabet, const int slidingWindowSize, const int paaSize)
 {
     _slidingWindowSize = slidingWindowSize;
-    _ppaSize = ppaSize;
+    _paaSize = paaSize;
     _saxAlphabet.assign(rInSaxAlphabet.begin(), rInSaxAlphabet.end());
 }
 
@@ -50,7 +50,7 @@ void ErdbAnomalyDiscovery::insertSample(const double sample)
 
         // compute sax word
         std::string word = "";
-        word = sax.sax(_ppaSize);
+        word = sax.sax(_paaSize);
 
         // insert word into sequitur grammar generator
         _sequitur.insertSymbol(word.c_str());
@@ -83,7 +83,7 @@ void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, st
     {
         printf("\n\n---- request ----\n\nReceived time series:\n");
         printSeries(_timeSeries);
-        printf("\nSliding window size: %d\nPPA size: %d\n", _slidingWindowSize, _ppaSize);
+        printf("\nSliding window size: %d\npaa size: %d\n", _slidingWindowSize, _paaSize);
         printf("\nGenerated sequitur grammar:\n\n");
         _sequitur.printGrammar();
         printf("\nDensity curve statistics:\n\n");

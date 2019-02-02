@@ -2,13 +2,13 @@
 
 using namespace timeSeries;
 
-int SessionManager::startSession(std::vector<std::string> &rInAlphabet, const int slidingWindow, const int ppaSize)
+int SessionManager::startSession(std::vector<std::string> &rInAlphabet, const int slidingWindow, const int paaSize)
 {
     // generate a new ID for the new session
     int newly_generated_session = genId();
 
     // store a new ErdbAnomalyDiscovery object to detect anomalies for this session
-    _sessions[newly_generated_session] = new ErdbAnomalyDiscovery(rInAlphabet, slidingWindow, ppaSize);
+    _sessions[newly_generated_session] = new ErdbAnomalyDiscovery(rInAlphabet, slidingWindow, paaSize);
 
     // returned session if
     return newly_generated_session;

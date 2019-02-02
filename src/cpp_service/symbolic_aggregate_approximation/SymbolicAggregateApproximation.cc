@@ -60,7 +60,7 @@ int SymbolicAggregateApproximation::getSaxAlphabetLetterIndex(const double mean,
     return rInRangeLimits.size() - 1;
 }
 
-std::string SymbolicAggregateApproximation::sax(const int ppaSize, const int start, const int range)
+std::string SymbolicAggregateApproximation::sax(const int paaSize, const int start, const int range)
 {
     // sax word to be returned
     std::string sax_word = "";
@@ -87,11 +87,11 @@ std::string SymbolicAggregateApproximation::sax(const int ppaSize, const int sta
     std::vector<double> znormed_subsequence;
     znormed_subsequence.assign(_rZNormTimeSeries.begin() + s_start, _rZNormTimeSeries.begin() + s_end);
 
-    // approximate subsequence with ppa to get sax words
-    PiecewiseAggregateApproximation ppa(&znormed_subsequence, ppaSize);
-    std::vector<double> approximated_series = *ppa.getApproximatedSeries();
+    // approximate subsequence with paa to get sax words
+    PiecewiseAggregateApproximation paa(&znormed_subsequence, paaSize);
+    std::vector<double> approximated_series = *paa.getApproximatedSeries();
 
-    // calculate sax word based on the approximated time series interval obtained with the ppa algorithm
+    // calculate sax word based on the approximated time series interval obtained with the paa algorithm
     for (unsigned int sample = 0; sample < approximated_series.size(); sample++)
     {
         int letter_index = getSaxAlphabetLetterIndex(approximated_series[sample], _letterIndexRanges);

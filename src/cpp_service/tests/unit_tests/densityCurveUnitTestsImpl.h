@@ -39,7 +39,7 @@ using namespace timeSeries;
 
 static bool densityCurveGenerationSlidingWindowUnitTest(std::vector<double> &rInSeries,
                                                         const int slidingWindowRange,
-                                                        const int ppaSize,
+                                                        const int paaSize,
                                                         std::vector<std::string> &rInAlphabet,
                                                         const char* pInExpectedOutput)
 {
@@ -48,7 +48,7 @@ static bool densityCurveGenerationSlidingWindowUnitTest(std::vector<double> &rIn
     // generate a sax word given a sliding window
     int start = 0;
     int range = slidingWindowRange;
-    int ppa_size = ppaSize;
+    int paa_size = paaSize;
     std::string word = "";
 
     Sequitur sequitur;
@@ -68,7 +68,7 @@ static bool densityCurveGenerationSlidingWindowUnitTest(std::vector<double> &rIn
         SymbolicAggregateApproximation sax(rInAlphabet, znormed_subsequence);
 
         // compute sax word
-        word = sax.sax(ppa_size);
+        word = sax.sax(paa_size);
 
         // insert word into sequitur grammar generator
         sequitur.insertSymbol(word.c_str());

@@ -4,20 +4,12 @@ defaults: &defaults
   working_directory: ~/singnet
   environment:
 
-    ORG: singnet
-    DOCKER_ORG: singularitynet
-
-    SERVICE_NAME: TSAD
-    AUTHOR: Alysson Ribeiro da Silva
-    REPOSITORY: time-series-anomaly-discovery
-    BRANCH: master
-    GIT_OWNER: singnet
+    # service info, change this
     SERVICE_DAEMON_PORT: 7090
+    REPOSITORY: time-series-anomaly-discovery
 
-    PROD_DOCKER_IMAGE_NAME: prod_alysson_time_series_anomaly_discovery
-    PROD_DOCKER_CONTAINER_NAME: PROD_ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY
-    STAGING_DOCKER_IMAGE_NAME: alysson_time_series_anomaly_discovery_staging
-    STAGING_DOCKER_CONTAINER_NAME: ALYSSON_TIME_SERIES_ANOMALY_DISCOVERY_STAGING
+    # cpp service base image, do not change this
+    BASE_CPP_IMAGE_NAME: cpp_service_base_image
       
 version: 2
 jobs:
@@ -25,50 +17,91 @@ jobs:
     <<: *defaults
     steps:
     - run:
-        name: Build docker image
+        name: Start container based on base cpp-service image
         command: |
+          # staging and production container names
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
-            docker image build --no-cache -t $STAGING_DOCKER_IMAGE_NAME https://raw.githubusercontent.com/$GIT_OWNER/$REPOSITORY/$BRANCH/Dockerfile
-          EOF
-    - run:
-        name: Start and perform integration tests
-        command: |
-          ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
+            # try to remove staging container if it already exists
+            echo "Stopping and removing existing staging container for this user..."
             docker stop $STAGING_DOCKER_CONTAINER_NAME || true
             docker rm $STAGING_DOCKER_CONTAINER_NAME || true
-            docker run --name $STAGING_DOCKER_CONTAINER_NAME $STAGING_DOCKER_IMAGE_NAME
+            echo "Finished."
+
+            # running the cpp service base container
+            echo "Running staging container based on the cpp basic service image..."
+            docker run -tdi --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME
+            echo "Finished."
+         
+            # clonning this service repo into the cpp base container
+            echo "Downloading the $REPOSITORY service to the staging container..."
+            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+              "mkdir /home/ubuntu; \
+               cd /home/ubuntu; \
+               git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git"
+            echo "Finished."
+          EOF
+    - run:
+        name: Perform integration tests
+        command: |
+          # staging and production container names
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+
+          ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
+            # Build source and run tests
+            echo "Building source inside staging container and performing integration tests..."
+            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+              "cd /home/ubuntu/$REPOSITORY; \
+               make; \
+               ./bin/deployTests"
+            echo "Finished."
           EOF
     - run:
         name: Deploy service
         command: |
+          # staging and production container names
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
-            if [ $CIRCLE_REPOSITORY_URL = "git@github.com:$GIT_OWNER/$REPOSITORY.git" ] && [ $CIRCLE_BRANCH = "$BRANCH" ] ; then
-              echo
-              echo "Stopping previous containers"
-              docker stop $STAGING_DOCKER_CONTAINER_NAME || true
-              docker rm $STAGING_DOCKER_CONTAINER_NAME || true 
+            if [ $CIRCLE_REPOSITORY_URL = "git@github.com:singnet/$REPOSITORY.git" ] && [ $CIRCLE_BRANCH = "master" ] ; then
+              echo "This service will be deployed since it passed all tests..."
+
+              # stop old production containers
+              echo "Stopping and removing old production container..."
               docker stop $PROD_DOCKER_CONTAINER_NAME || true
               docker rm $PROD_DOCKER_CONTAINER_NAME || true
-              echo "Containers stopped"
-              echo
-              echo "Creating production image tag"
-              docker rmi $PROD_DOCKER_IMAGE_NAME || true
-              docker image tag $STAGING_DOCKER_IMAGE_NAME $PROD_DOCKER_IMAGE_NAME
-              echo "Image created"
-              echo
-              echo "Starting service container"
-              docker run -tdi -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT --name $PROD_DOCKER_CONTAINER_NAME $PROD_DOCKER_IMAGE_NAME
-              echo "Container started"
-              echo
+              echo "Finished."
+
+              # stop staging container to the new producton one
+              echo "Stopping and removing staging container..."
+              docker stop $STAGING_DOCKER_CONTAINER_NAME || true
+              docker rm $STAGING_DOCKER_CONTAINER_NAME || true 
+              echo "Finished."
+
+              # running the cpp service container, service daemon and server
+              echo "Creating production container..."
+              docker run -tdi -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT --name $PROD_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME /bin/bash -c \
+                "mkdir /home/ubuntu; \
+                 cd /home/ubuntu; \
+                 git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git; \
+                 cd $REPOSITORY; \
+                 ./setup.sh -r"
+              echo "Finished."
+              echo "Service is up."
             else
-              echo "Repository: $CIRCLE_REPOSITORY_URL"
-              echo "Branch: $CIRCLE_BRANCH"
               echo "================================================================================"
               echo "                        Service WILL NOT be deployed"
               echo "================================================================================"
+
+              # remove staging containers since tests and build failed
+              echo "Stopping and removing staging container..."
               docker stop $STAGING_DOCKER_CONTAINER_NAME || true
               docker rm $STAGING_DOCKER_CONTAINER_NAME || true
-              docker rmi $STAGING_DOCKER_IMAGE_NAME || true
+              echo "Finished."
             fi
           EOF
 workflows:
