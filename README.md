@@ -150,7 +150,7 @@ Expected output:
 4 5 10 11 16 17 22 23
 ```
 
-The output represents the indexes in which anomalies were detected in the original time series (Starting from 0):
+The output represents the indexes in which anomalies were detected in the original time series (Starting from 0).
 
 ## Parameters Explanation
 
