@@ -161,10 +161,10 @@ The presented output represents the indexes in which anomalies were detected in 
 ## Parameters Explanation
 
 * arg [1]
-   * Type = String numbers separated by space.
+   * Type = String numbers separated by spaces.
    * Represents: The time series in which anomalies will be detected.
 * arg [2]
-   * Type = String symbols separated by space.
+   * Type = String symbols separated by spaces.
    * Represents: Alphabet used to discretizise the paa apporximation.
 * arg [3]
    * Type = Integer
