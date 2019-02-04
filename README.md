@@ -136,7 +136,7 @@ After building the source, run the GPRC server with following command. It will r
 ./bin/server &
 ```
 
-## Step 3 - calling GRPC server locally
+## Step 3 - Calling GRPC server locally
 
 After running the server, run the client with the command presented bellow. With the presented example input parameters, the algorithms should be able to detect simulated spikes in the input time series. A spike is represented by the number 1000 while a normal sample is represented by the number 1.
 
