@@ -112,12 +112,12 @@ To build this project's source and perform tests, run the following command in t
 
 
 ```
-./setup.sh -c
+./setup.sh -b
 ```
 
 Besides building the source, this command will check the responsiveness of real requests to this service GRPC server.
 
-<details><summary>Click here to see the commands called by './setup.sh -c'</summary><p>
+<details><summary>Click here to see the commands called by './setup.sh -b'</summary><p>
     
 ```
 # build source
@@ -153,87 +153,19 @@ snetd --config snetd.config.json &
 ```
 </p></details>
 
-## Publishing
+## Publishing and Performing a Test Eequest
 
-To publish variants of this service, call the following.
-
-
-```
-./setup.sh -p
-```
-
-This command will publish the service with the specified information in [service configuration file][service_confi_file] located in the project's root directory. Just remember that in order to publish a service, you firstly need a valid identity and [service configuration file][service_confi_file]. We higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about the publication process.
-
-<details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
-    
-```
-# delete service before trying to publish it
-snet service delete $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
-
-# create metadata json for this service with its name and the wallet that will receive money
-snet service metadata-init src/service_spec $SERVICE_NAME_VAR $WALLET_VAR
-
-# set the price to use this service
-snet service metadata-set-fixed-price $PRICE_VAR
-
-# set the local port to access this service server
-snet service metadata-add-endpoints https://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
-
-# publish the service at the specified organization
-snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
-```
-</p></details>
-
-## Performing a test request
-
-To perform a test request, run the following command.
-
-```
-./setup.sh -e
-```
-This will do a request to this service DAEMON, already published at snet, with the default input parameter and DAEMON address specified in the [service configuration file][service_confi_file].
-
-*A call for this service is free, however in order for this to work you need to have a valid identity/account.*
-
-For more info regarding service calls, publication, DAEMON, how to create identities/accounts, and the blockchain, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
-
-<details><summary>Click here to see the commands called by './setup.sh -e'</summary><p>
-    
-```
-echo
-echo "Running a test call to this service daemon with the specified data in the 'service_conf' file."
-
-# open a channel with the deposited amount to call for this service
-CHANNEL_TIME_OUT=11000000
-RESPONSE="$(snet channel open-init $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR $PRICE_VAR $CHANNEL_TIME_OUT -y)"
-
-# get channel ID from the last substring obtained from the RESPONSE variable
-RESPONSES=( $RESPONSE )
-LENGTH=${#RESPONSES[@]}
-CHANNEL_ID_INDEX=$(($LENGTH - 1))
-CHANNEL_ID=${RESPONSES[$(($LENGTH - 1))]}
-
-# call for the created service
-DAEMON_RESPONSE="$(snet client call "$CHANNEL_ID" "$PRICE_VAR" "$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR" "$TEST_CALL_METHOD_VAR" "$TEST_CALL_INPUT_VAR")"
-
-# print response from daemon
-echo
-echo "Daemon response:"
-echo
-echo $DAEMON_RESPONSE
-echo
-```
-</p></details>
+In order to publish or run services, we higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about both processes.
 
 ## Docker
-This project also provides a Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build an image.
+This project also provides a basic C++ service based Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build this image. 
 
 ```
 # build the docker image
-docker build -t times-series-anomaly--image:dev .
+docker build -t times-series-anomaly--image:dev -< CppServiceBaseDockerfile
 ```
 
-For more info regarding service calls and how to configure docker to run your services, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
+It does not contains the project's source code.
 
 ## Contributing and Reporting Issues
 
