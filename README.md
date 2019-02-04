@@ -40,11 +40,17 @@ For a detailed explanation about how this service works see the [users guide][us
 
 <!--ts-->
    * [Getting Started](#getting-started)
-   * [Building](#building)
-   * [Running](#running)
-   * [Publishing](#publishing)
-   * [Perfoming a Test Request](#performing-a-test-request)
+      * [Step 1 - Building](#step-1-building)
+      * [Step 2 - Running local GRPC server](#step-2-running-local-grpc-server)
+      * [Step 3 - Calling GRPC server locally](#step-3-Calling-grpc-server-locally)
+   * [Parameters Explanation](#parameters-explanation)
+   * [Running with DAEMON](#running-with-daemon)
+   * [Publishing and Performing a Test Request Through the Daemon](#publishing-and-performing-a-test-request-through-the-daemon)
    * [Docker](#docker)
+   * [More stuff](#more-stuff)
+      * [Publishing](#publishing)
+      * [Performing a Test Request](#performing-a-test-request)
+      * [Creating a CircleCi Configuration File](#creating-a-circleci-configuration-file)
    * [Contributing and Reporting Issues](#contributing-and-reporting-issues)
    * [Author](#author)
    * [References](#references)
@@ -106,18 +112,18 @@ pip3 install -e .; \
 ```
 </p></details>
 
-## Building
+## Step 1 - Building
 
 To build this project's source and perform tests, run the following command in the project's root directory.
 
 
 ```
-./setup.sh -c
+./setup.sh -b
 ```
 
 Besides building the source, this command will check the responsiveness of real requests to this service GRPC server.
 
-<details><summary>Click here to see the commands called by './setup.sh -c'</summary><p>
+<details><summary>Click here to see the commands called by './setup.sh -b'</summary><p>
     
 ```
 # build source
@@ -128,9 +134,51 @@ make clean; make
 ```
 </p></details>
 
-## Running
+## Step 2 - Running local GRPC server
 
-In order to build and get this service running, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
+After building the source, run the GPRC server with following command. It will run the server in background mode. 
+
+```
+./bin/server &
+```
+
+## Step 3 - Calling GRPC server locally
+
+After running the server, run the client with the command presented bellow. With the presented example input parameters, the algorithms should be able to detect simulated spikes in the input time series. A spike is represented by the number 1000 while a normal sample is represented by the number 1.
+
+```
+./bin/client "1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 100" "a b c d e f g h i j" 4 2 0
+```
+
+Expected output:
+
+```
+4 5 10 11 16 17 22 23
+```
+
+The presented output represents the indexes in which anomalies were detected in the original time series beginning at index 0.
+
+## Parameters Explanation
+
+* arg [1]
+   * Type = String numbers separated by spaces.
+   * Represents: The time series in which anomalies will be detected.
+* arg [2]
+   * Type = String symbols separated by spaces.
+   * Represents: Alphabet used to discretizise the paa apporximation.
+* arg [3]
+   * Type = Integer
+   * Represents: Sliding window size used to create the time series symbols to build the free context grammar through the Sequitur algorithm.
+* arg [4]
+   * Type = Integer
+   * Represents: Piecewise Aggregate Approximation defining the number of sub-samples that will be generated for each sliding window position.
+* arg [5]
+   * Type = Integer
+   * Represents: Debug printing flag, where 0 is false and 1 is true.
+
+## Running with DAEMON
+
+In order to build and get this service running with the DAEMON, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
 
 
 ```
@@ -153,7 +201,27 @@ snetd --config snetd.config.json &
 ```
 </p></details>
 
-## Publishing
+## Publishing and Performing a Test Request Through the Daemon
+
+In order to publish, run services, configure and call the DAEMON, we higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about those processes.
+
+## Docker
+This project also provides a basic C++ service based Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build this image. 
+
+```
+# build the docker image
+docker build -t times-series-anomaly--image:dev -< CppServiceBaseDockerfile
+```
+
+It does not contains the project's source code.
+
+## More Stuff
+
+Here are more commands provided by the 'setup' script.
+
+<details><summary>Click here to see the the 'More Stuff' commands.</summary><p>
+
+### Publishing
 
 To publish variants of this service, call the following.
 
@@ -184,7 +252,7 @@ snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 ```
 </p></details>
 
-## Performing a test request
+### Performing a test request
 
 To perform a test request, run the following command.
 
@@ -225,15 +293,17 @@ echo
 ```
 </p></details>
 
-## Docker
-This project also provides a Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build an image.
+### Creating CircleCi Config File
+
+In order to create a circleci configuration file for this project use the following command.
 
 ```
-# build the docker image
-docker build -t times-series-anomaly--image:dev .
+./setup.sh -c
 ```
 
-For more info regarding service calls and how to configure docker to run your services, see [Sigularity Net Service Tutorial][singnet_service_tutorial].
+This will create a [SingularityNET][singularitynet-home] circleci configuration file based on the [service configuration file][service_confi_file] located in the project's root directory.
+
+</p></details>
 
 ## Contributing and Reporting Issues
 
