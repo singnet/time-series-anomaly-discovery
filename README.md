@@ -106,7 +106,7 @@ pip3 install -e .; \
 ```
 </p></details>
 
-## Building
+## Step 1 - Building
 
 To build this project's source and perform tests, run the following command in the project's root directory.
 
@@ -128,9 +128,51 @@ make clean; make
 ```
 </p></details>
 
-## Running
+## Step 2 - Running local GRPC server
 
-In order to build and get this service running, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
+After building the source, run the GPRC server with following command. It will run the server in background mode. 
+
+```
+./bin/server &
+```
+
+## Step 3 - calling GRPC server locally
+
+After running the server, run the client with the command presented bellow. With the presented example input parameters, the algorithms should be able to detect simulated spikes in the input time series. A spike is represented by the number 1000 while a normal sample is represented by the number 1.
+
+```
+./bin/client "1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 100" "a b c d e f g h i j" 4 2 0
+```
+
+Expected output:
+
+```
+4 5 10 11 16 17 22 23
+```
+
+The output represents the indexes in which anomalies were detected in the original time series (Starting from 0):
+
+## Parameters Explanation
+
+* arg [1]
+   * Type = String numbers separated by space.
+   * Represents: The time series in which anomalies will be detected.
+* arg [2]
+   * Type = String symbols separated by space.
+   * Represents: Alphabet used to discretizise the paa apporximation.
+* arg [3]
+   * Type = Integer
+   * Represents: Sliding window size used to create the time series symbols to build the free context grammar through the Sequitur algorithm.
+* arg [4]
+   * Type = Integer
+   * Represents: Piecewise Aggregate Approximation defining the number of sub-samples that will be generated for each sliding window position.
+* arg [5]
+   * Type = Integer
+   * Represents: Debug printing flag, where 0 is false and 1 is true.
+
+## Running with DAEMON
+
+In order to build and get this service running with the DAEMON, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
 
 
 ```
@@ -153,9 +195,9 @@ snetd --config snetd.config.json &
 ```
 </p></details>
 
-## Publishing and Performing a Test Eequest
+## Publishing and Performing a Test Request Through the Daemon
 
-In order to publish or run services, we higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about both processes.
+In order to publish, run services, configure and call the DAEMON, we higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about those processes.
 
 ## Docker
 This project also provides a basic C++ service based Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build this image. 
