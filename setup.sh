@@ -18,6 +18,7 @@ DAEMON_VAR=0
 PUBLISH_VAR=0
 INSTALL_VAR=0
 REQUEST_VAR=0
+DEPLOY_VAR=0
 LOAD_CONFIG_VAR=0
 USAGE_VAR=0
 
@@ -40,7 +41,7 @@ usage()
 }
 
 # filter all entered options
-while getopts 'bcrpeih' flag; do
+while getopts 'bcrpeidh' flag; do
   case "${flag}" in
     b) COMPILE_VAR=1 ;;
     c) CIRCLECI_VAR=1 ;;
@@ -48,6 +49,7 @@ while getopts 'bcrpeih' flag; do
     p) PUBLISH_VAR=1 ;;
     e) REQUEST_VAR=1 ;;
     i) INSTALL_VAR=1 ;;
+    d) DEPLOY_VAR=1 ;;
     h) usage
        exit ;;
     *) usage
@@ -125,7 +127,7 @@ createDeamonConfig()
 {
     # create daemon config file and associate the SERVICE_DAEMON_PORT with the SERVICE_SERVER_PORT
     JSON="{
-    \"DAEMON_END_POINT\": \"http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR\",
+    \"DAEMON_END_POINT\": \"localhost:$SERVICE_DAEMON_PORT_VAR\",
     \"ETHEREUM_JSON_RPC_ENDPOINT\": \"$CRIPTOCURRENCY_NETWORK_VAR\",
     \"IPFS_END_POINT\": \"$IPFS_END_POINT_VAR\",
     \"REGISTRY_ADDRESS_KEY\": \"$REGISTRY_KEY_VAR\",
@@ -428,9 +430,9 @@ if [ $INSTALL_VAR == 1 ]; then
     # install daemon
     mkdir snet-daemon; \
     cd snet-daemon; \
-    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-    tar -xvf snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-    mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
     cd ..; \
     rm -rf snet-daemon; \
 
@@ -444,3 +446,13 @@ if [ $INSTALL_VAR == 1 ]; then
 
 fi
 
+if [ $DEPLOY_VAR == 1 ]; then
+    # install daemon
+    mkdir snet-daemon; \
+    cd snet-daemon; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    cd ..; \
+    rm -rf snet-daemon
+fi

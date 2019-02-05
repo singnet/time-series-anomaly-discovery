@@ -1,0 +1,20 @@
+# image to be used
+FROM ubuntu:18.04
+
+# update
+RUN apt-get update
+
+# install deps
+RUN apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+                       libgflags-dev libgtest-dev clang libc++-dev git curl nano \
+                       wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev
+
+# install GRPC
+RUN git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
+    cd grpc; \
+    git submodule update --init; \
+    make; \
+    make install; \
+    cd third_party/protobuf; \
+    make install; \
+    cd /
