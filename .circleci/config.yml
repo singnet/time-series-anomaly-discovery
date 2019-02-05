@@ -34,7 +34,7 @@ jobs:
             echo "Finished."
 
             # check if base cpp image exists, if not then build it with the assigned name
-            if [ $BASIC_IMAGE_STATUS = "" ]; then
+            if [ "$BASIC_IMAGE_STATUS" = "" ]; then
               echo "Creating base cpp service image since it does not exist"
               docker build --no-cache -t $BASE_CPP_IMAGE_NAME:latest https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/master/Dockerfiles/CppServiceBaseDockerfile
               echo "Finish..."
