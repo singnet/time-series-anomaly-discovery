@@ -89,7 +89,7 @@ jobs:
                  cd /home/ubuntu; \
                  git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git; \
                  cd $REPOSITORY; \
-                 ./setup.sh -r"
+                 ./setup.sh -dr"
               echo "Finished."
               echo "Service is up."
             else
