@@ -424,7 +424,7 @@ if [ $DEPLOY_VAR == 1 ]; then
     cd snet-daemon; \
     wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
     tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
-    sudo mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
     cd ..; \
     rm -rf snet-daemon
 fi
