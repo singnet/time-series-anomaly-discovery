@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 # update
 RUN apt-get update
 
-# install GRPC deps, clean build, and tests
+# install deps
 RUN apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
                        libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                        wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev
@@ -19,18 +19,13 @@ RUN git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
     make install; \
     cd /
 
-# install daemon
-RUN mkdir snet-daemon; \
-    cd snet-daemon; \
-    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-    tar -xvf snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-    mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
-    cd ..; \
-    rm -rf snet-daemon
+# clone service repository into this dockerfile and install the DAEMON and service specific dependencies
+RUN mkdir /home/ubuntu; \
+    cd /home/ubuntu; \
+    git clone https://github.com/singnet/time-series-anomaly-discovery.git; \
+    cd time-series-anomaly-discovery; \
+    ./setup.sh -d
 
-# Install snet-cli
-RUN cd /opt; \
-    git clone https://github.com/singnet/snet-cli; \
-    cd snet-cli; \
-    ./scripts/blockchain install; \
-    pip3 install -e .
+# run DAEMON and service
+CMD ["/bin/bash", "-c", "/home/ubuntu/time-series-anomaly-discovery/setup.sh -r"]
+

@@ -18,8 +18,10 @@ DAEMON_VAR=0
 PUBLISH_VAR=0
 INSTALL_VAR=0
 REQUEST_VAR=0
+DEPLOY_VAR=0
 LOAD_CONFIG_VAR=0
 USAGE_VAR=0
+BUILD_IMAGE_LATEST=0
 
 # usage printing method
 usage()
@@ -40,7 +42,7 @@ usage()
 }
 
 # filter all entered options
-while getopts 'bcrpeih' flag; do
+while getopts 'bcrpeidgh' flag; do
   case "${flag}" in
     b) COMPILE_VAR=1 ;;
     c) CIRCLECI_VAR=1 ;;
@@ -48,6 +50,8 @@ while getopts 'bcrpeih' flag; do
     p) PUBLISH_VAR=1 ;;
     e) REQUEST_VAR=1 ;;
     i) INSTALL_VAR=1 ;;
+    d) DEPLOY_VAR=1 ;;
+    g) BUILD_IMAGE_LATEST=1 ;;
     h) usage
        exit ;;
     *) usage
@@ -125,7 +129,7 @@ createDeamonConfig()
 {
     # create daemon config file and associate the SERVICE_DAEMON_PORT with the SERVICE_SERVER_PORT
     JSON="{
-    \"DAEMON_END_POINT\": \"http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR\",
+    \"DAEMON_END_POINT\": \"localhost:$SERVICE_DAEMON_PORT_VAR\",
     \"ETHEREUM_JSON_RPC_ENDPOINT\": \"$CRIPTOCURRENCY_NETWORK_VAR\",
     \"IPFS_END_POINT\": \"$IPFS_END_POINT_VAR\",
     \"REGISTRY_ADDRESS_KEY\": \"$REGISTRY_KEY_VAR\",
@@ -280,6 +284,43 @@ workflows:
     echo "$CIRCLE_CI_CONFIG_STRING" >> ./.circleci/config.yml
 }
 
+buildDockerFile()
+{
+DOCKER_FILE="
+# image to be used
+FROM ubuntu:18.04
+
+# update
+RUN apt-get update
+
+# install deps
+RUN apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+                       libgflags-dev libgtest-dev clang libc++-dev git curl nano \
+                       wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev
+
+# install GRPC
+RUN git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
+    cd grpc; \
+    git submodule update --init; \
+    make; \
+    make install; \
+    cd third_party/protobuf; \
+    make install; \
+    cd /
+
+# clone service repository into this dockerfile and install the DAEMON and service specific dependencies
+RUN mkdir /home/ubuntu; \
+    cd /home/ubuntu; \
+    git clone https://github.com/Ophien/time-series-anomaly-discovery.git; \
+    cd time-series-anomaly-discovery; \
+    ./setup.sh -d
+
+# run DAEMON and service
+CMD [\"/bin/bash\", \"-c\", \"/home/ubuntu/time-series-anomaly-discovery/setup.sh -r\"]"
+
+return $DOCKER_FILE
+}
+
 run()
 {
     # create snet daemon config file
@@ -326,6 +367,67 @@ callService()
     echo $DAEMON_RESPONSE
     echo
 }
+
+################################################
+# -------------------------------------------- #
+# ----- INSTALL ALL DEPS FOR THIS SERVICE ---- #
+# -------------------------------------------- #
+################################################
+
+if [ $INSTALL_VAR == 1 ]; then
+    apt-get update;\
+    apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+                       libgflags-dev libgtest-dev clang libc++-dev git curl nano \
+                       wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
+
+    # try upgrade pip
+    pip install --upgrade pip; \
+
+    # install GRPC
+    cd /;\
+    git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
+    cd grpc; \
+    git submodule update --init; \
+    make; \
+    make install; \
+    cd third_party/protobuf; \
+    make install; \
+    cd /;\
+
+    # install daemon
+    mkdir snet-daemon; \
+    cd snet-daemon; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    cd ..; \
+    rm -rf snet-daemon; \
+
+    # install cli
+    cd /opt; \
+    git clone https://github.com/singnet/snet-cli; \
+    cd snet-cli; \
+    ./scripts/blockchain install; \
+    pip3 install -e .; \
+    cd $PROJECT_PATH 
+fi
+
+################################################
+# -------------------------------------------- #
+# ----------- INSTALL SNET DAEMON ------------ #
+# -------------------------------------------- #
+################################################
+
+if [ $DEPLOY_VAR == 1 ]; then
+    # install daemon
+    mkdir snet-daemon; \
+    cd snet-daemon; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    cd ..; \
+    rm -rf snet-daemon
+fi
 
 ################################################
 # -------------------------------------------- #
@@ -398,49 +500,3 @@ if [ $REQUEST_VAR == 1 ]; then
     # do a test call for this service daemon
     callService
 fi
-
-################################################
-# -------------------------------------------- #
-# ----- INSTALL ALL DEPS FOR THIS SERVICE ---- #
-# -------------------------------------------- #
-################################################
-
-if [ $INSTALL_VAR == 1 ]; then
-    apt-get update;\
-    apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
-                       libgflags-dev libgtest-dev clang libc++-dev git curl nano \
-                       wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
-
-    # try upgrade pip
-    pip install --upgrade pip; \
-
-    # install GRPC
-    cd /;\
-    git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
-    cd grpc; \
-    git submodule update --init; \
-    make; \
-    make install; \
-    cd third_party/protobuf; \
-    make install; \
-    cd /;\
-
-    # install daemon
-    mkdir snet-daemon; \
-    cd snet-daemon; \
-    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-    tar -xvf snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-    mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
-    cd ..; \
-    rm -rf snet-daemon; \
-
-    # install cli
-    cd /opt; \
-    git clone https://github.com/singnet/snet-cli; \
-    cd snet-cli; \
-    ./scripts/blockchain install; \
-    pip3 install -e .; \
-    cd $PROJECT_PATH 
-
-fi
-
