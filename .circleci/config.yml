@@ -30,6 +30,11 @@ jobs:
             docker rm $STAGING_DOCKER_CONTAINER_NAME || true
             echo "Finished."
 
+            # check if base cpp image exists, if not then build it with the assigned name
+            if [[ "$(docker images -q $BASE_CPP_IMAGE_NAME:latest 2> /dev/null)" == "" ]]; then
+              docker build --no-cache -t $BASE_CPP_IMAGE_NAME:latest https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/master/Dockerfiles/CppServiceBaseDockerfile
+            fi
+
             # running the cpp service base container
             echo "Running staging container based on the cpp basic service image..."
             docker run -tdi --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME
