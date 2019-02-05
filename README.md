@@ -206,14 +206,19 @@ snetd --config snetd.config.json &
 In order to publish, run services, configure and call the DAEMON, we higly recommend you to see the [Sigularity Net Service Tutorial][singnet_service_tutorial] for a more detailed explanation about those processes.
 
 ## Docker
-This project also provides a basic C++ service based Dockerfile to allow to build docker images ready to run this service. The command bellow can be used to build this image. 
+This project provides two docker images located at the Dockerfiles folder. One is a basic C++ service based Dockerfile to allow to build basic docker images ready to run C++ services. On the other hand, the other one incorporates the service source, DAEMON, and a final CMD command to run the service directly with the docker 'run' command. 
+
+In order to build a basic C++ service-ready image use the following command in the project's root directory.
 
 ```
-# build the docker image
-docker build -t times-series-anomaly--image:dev -< CppServiceBaseDockerfile
+docker build -t cpp_basic_image:latest -< ./Dockerfiles/CppServiceBaseDockerfile
 ```
 
-It does not contains the project's source code.
+In order to build a full image containing this service source and a CMD command that runs the service with the docker 'run' command, perform the following command in the projects root directory.
+
+```
+docker build -t time-series-anomaly-discovery:latest -< ./Dockerfiles/TimeSeriesAnomalyDiscovery
+```
 
 ## More Stuff
 
