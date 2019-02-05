@@ -129,7 +129,7 @@ createDeamonConfig()
 {
     # create daemon config file and associate the SERVICE_DAEMON_PORT with the SERVICE_SERVER_PORT
     JSON="{
-    \"DAEMON_END_POINT\": \"localhost:$SERVICE_DAEMON_PORT_VAR\",
+    \"DAEMON_END_POINT\": \"0.0.0.0:$SERVICE_DAEMON_PORT_VAR\",
     \"ETHEREUM_JSON_RPC_ENDPOINT\": \"$CRIPTOCURRENCY_NETWORK_VAR\",
     \"IPFS_END_POINT\": \"$IPFS_END_POINT_VAR\",
     \"REGISTRY_ADDRESS_KEY\": \"$REGISTRY_KEY_VAR\",
@@ -424,7 +424,7 @@ if [ $DEPLOY_VAR == 1 ]; then
     cd snet-daemon; \
     wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
     tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
-    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    sudo mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
     cd ..; \
     rm -rf snet-daemon
 fi

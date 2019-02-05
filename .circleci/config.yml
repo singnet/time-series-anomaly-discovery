@@ -19,6 +19,9 @@ jobs:
     - run:
         name: Start container based on base cpp-service image
         command: |
+          # check if base image exist
+          BASIC_IMAGE_STATUS=$(ssh -tt -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST 'docker images -q $BASE_CPP_IMAGE_NAME')
+        
           # staging and production container names
           STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
           PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
@@ -31,8 +34,10 @@ jobs:
             echo "Finished."
 
             # check if base cpp image exists, if not then build it with the assigned name
-            if [[ "$(docker images -q $BASE_CPP_IMAGE_NAME:latest 2> /dev/null)" == "" ]]; then
+            if [ $BASIC_IMAGE_STATUS = "" ]; then
+              echo "Creating base cpp service image since it does not exist"
               docker build --no-cache -t $BASE_CPP_IMAGE_NAME:latest https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/master/Dockerfiles/CppServiceBaseDockerfile
+              echo "Finish..."
             fi
 
             # running the cpp service base container
