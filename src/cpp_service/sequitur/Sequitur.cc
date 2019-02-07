@@ -24,8 +24,13 @@ void Sequitur::setDebug(bool val)
     _debug = val;
 }
 
-void Sequitur::getRule(int ruleCode, std::string &rOutRule)
+void Sequitur::getRule(int ruleCode, std::vector<std::string> &rOutRule)
 {
+    std::string rule_id_string = "~" + std::to_string(ruleCode);
+    if (_rules.find(rule_id_string) != _rules.end())
+    {
+        rOutRule = _rules[rule_id_string];
+    }
 }
 
 void Sequitur::checkDigram(std::vector<std::string> &rInRule,
@@ -70,6 +75,11 @@ void Sequitur::verifyRuleExistance(std::vector<std::string> &rInDigram, std::str
     std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
     for (; it != _rules.end(); it++)
     {
+        if (it->second.size() > 2)
+        {
+            continue;
+        }
+
         if (it->first == "~0")
         {
             continue;
@@ -106,9 +116,13 @@ bool Sequitur::enforceRulesUtility()
         std::vector<std::string> rule_occurrences;
         int rule_usage_count = ruleUsageCount(current_rule, rule_occurrences_symbols, rule_occurrences);
 
-        // enfor rule utility only if it has been used once
+        // enforce rule utility only if it has been used once
         if (rule_usage_count == 1)
         {
+            if (_debug)
+            {
+                printf("Enforcing rule: %s\n", current_rule.c_str());
+            }
             // tell the algorithm that a replacement happened
             replaced = true;
 
@@ -232,17 +246,29 @@ bool Sequitur::generateRules()
         }
     }
 
+    // print grammar for each iteration
+    if (grammar_updated && _debug)
+    {
+        printf("Rule generated: %s\n", rule.c_str());
+        printGrammar();
+    }
+
     return grammar_updated;
 }
 
-void Sequitur::insertSymbol(const char *pInSymbol)
+void Sequitur::insertSymbol(const char *pInSymbol, bool discardEquals)
 {
+    if (_debug)
+    {
+        printf("Inserted symbol: %s\n", pInSymbol);
+    }
+
     int primary_symbol_length = _rules["~0"].size();
     int minimum_symbol_length = 4;
     bool insert_newword = true;
 
     // ignore repeated words for better compression, it is indispensable for the correct working of the algorithm
-    if (_lastInsertedSymbol.length() > 0)
+    if (_lastInsertedSymbol.length() > 0 && discardEquals)
     {
         if (_lastInsertedSymbol == pInSymbol)
         {
@@ -257,12 +283,20 @@ void Sequitur::insertSymbol(const char *pInSymbol)
         _lastInsertedSymbol.assign(pInSymbol);
     }
 
-    if (primary_symbol_length >= minimum_symbol_length)
+    bool grammar_updated = false;
+    do
     {
+        if (primary_symbol_length < minimum_symbol_length)
+        {
+            break;
+        }
+
         // update grammar until there is a possible change to be made
-        while (generateRules())
-            ;
-    }
+        grammar_updated = generateRules();
+
+    } while (grammar_updated);
+
+    enforceRulesUtility();
 
     if (_debug)
     {
@@ -283,4 +317,24 @@ void Sequitur::printGrammar()
         printf("\n");
     }
     printf("\n");
+}
+
+void Sequitur::expandGrammar(std::string rule, std::string &rOutString)
+{
+    // clear out string to ensure that the op. will be performed ok
+    std::vector<std::string> &rules_symbols = _rules[rule];
+
+    for (unsigned int symbol = 0; symbol < rules_symbols.size(); symbol++)
+    {
+        std::string current_symbol = rules_symbols[symbol];
+
+        if (isRule(current_symbol))
+        {
+            expandGrammar(current_symbol, rOutString);
+        }
+        else
+        {
+            rOutString.append(current_symbol);
+        }
+    }
 }
