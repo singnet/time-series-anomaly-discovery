@@ -36,6 +36,25 @@
 
 using namespace timeSeries;
 
+static bool sequiturStringCompressionUnitTest(std::string &rInString, std::string &rOutString) {
+    printf("\n\nSequitur string compression unit test...\n\n");
+
+    Sequitur sequitur;
+    //sequitur.setDebug(true);
+
+    for (int symbol = 0; symbol < rInString.length(); symbol++) {
+        std::string input_symbol = "";
+        input_symbol += rInString.at(symbol);
+        sequitur.insertSymbol(input_symbol.c_str());
+    }
+
+    //sequitur.enforceRulesUtility();
+
+    sequitur.expandGrammar("~0", rOutString);
+
+    printf("Input string: %s\n\n\n\nGrammar expanded string: %s\n", rInString.c_str(), rOutString.c_str());
+}
+
 static bool sequiturGrammarGenerationUnitTest(std::vector<double> &rInSeries,
                                               const int slidingWindowRange,
                                               const int paaSize,
@@ -69,11 +88,8 @@ static bool sequiturGrammarGenerationUnitTest(std::vector<double> &rInSeries,
         word = sax.sax(paa_size);
 
         // insert word into sequitur grammar generator
-        sequitur.insertSymbol(word.c_str());
+        sequitur.insertSymbol(word.c_str(), false);
     }
-
-    // enforce rule utility
-    sequitur.enforceRulesUtility();
 
     // print grammar
     sequitur.printGrammar();

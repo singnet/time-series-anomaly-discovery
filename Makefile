@@ -83,7 +83,7 @@ SERVER_DEPS += $(OBJ_FOLDER)/timeSeriesUtils.o
 SERVER_DEPS += $(OBJ_FOLDER)/SessionManager.o
 SERVER_DEPS += $(OBJ_FOLDER)/utils.o
 
-all: grpcProto genObj server client test_bin
+all: grpcProto genDebugObj unit_tests_debug genObj server client test_bin 
 
 server:
 	$(CXX) $^ $(LDFLAGS) -o ./bin/server\
@@ -100,6 +100,9 @@ client:
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
 		/usr/local/lib/libgrpc++.so
 
+unit_tests_debug:
+	$(CXX) -o ./bin/unitTests $(OBJ_FOLDER)/unitTestsMain.o $(SERVER_DEPS)
+
 test_bin:
 	$(CXX) -o ./bin/deployTests $(OBJ_FOLDER)/deployTestsMain.o
 
@@ -108,6 +111,10 @@ grpcProto: $(GRPC_PROTO_OBJ)
 		timeSeriesAnomalyDetection.pb.h\
 		timeSeriesAnomalyDetection.grpc.pb.cc\
 		timeSeriesAnomalyDetection.grpc.pb.h $(SOURCE_FOLDER)/core
+
+genDebugObj:
+	$(CXX) $(CXXFLAGS) $(CXX_DEBUG_FLAG) -I$(HEADER_FOLDER) -c $(SOURCE)
+	@mv *.o $(OBJ_FOLDER)
 
 genObj:
 	$(CXX) $(CXXFLAGS) -I$(HEADER_FOLDER) -c $(SOURCE)
