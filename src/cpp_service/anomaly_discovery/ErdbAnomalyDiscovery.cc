@@ -20,9 +20,29 @@ ErdbAnomalyDiscovery::~ErdbAnomalyDiscovery()
 
 void ErdbAnomalyDiscovery::insertTimeSeries(std::vector<double> &rInTimeSeries)
 {
-    for (unsigned int sample = 0; sample < rInTimeSeries.size(); sample++)
+    _timeSeries.assign(rInTimeSeries.begin(), rInTimeSeries.end());
+
+    std::vector<double> znormed_series;
+    zNorm(_timeSeries, znormed_series);
+
+    // create sax object to generate a sax words
+    SymbolicAggregateApproximation sax(_saxAlphabet, znormed_series);
+
+    for (int i = _slidingWindowSize; i < _timeSeries.size(); i++)
     {
-        insertSample(rInTimeSeries[sample]);
+        // get subsequence
+        std::vector<double> subsequence;
+        getSubsequence(znormed_series, subsequence, i - _slidingWindowSize, _slidingWindowSize);
+
+        // compute sax word
+        std::string word = "";
+        word = sax.sax(_paaSize, i - _slidingWindowSize, _slidingWindowSize);
+
+        // insert word into sequitur grammar generator
+        _sequitur.insertSymbol(word.c_str());
+
+        // insert word into density curve to keep track of it
+        _densityCurve.insertSymbol(word.c_str());
     }
 }
 
@@ -60,16 +80,13 @@ void ErdbAnomalyDiscovery::insertSample(const double sample)
     }
 }
 
-void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString, bool debug)
+void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString, const int threshold, bool debug)
 {
-    // enforce rule utilities in sequitur for better compression
-    _sequitur.enforceRulesUtility();
-
     // update density curve and calculate max and min, globall and locals
-    _densityCurve.updateDensityCurve(_sequitur);
+    _densityCurve.updateDensityCurve(_sequitur, threshold);
 
     // get anomalies with the efficient rule density-base anomaly discovery method
-    _densityCurve.getGlobalMinDensities(rOutAnomaliesIndex);
+    _densityCurve.getThresholdDetectedAnomalies(rOutAnomaliesIndex);
 
     // extract string if output string is non-null
     if (pOutAnomaliesIndexString != nullptr)
@@ -100,4 +117,9 @@ void ErdbAnomalyDiscovery::printAnomalies(std::vector<int> &rInAnomaliesIndex)
         printf("%d ", rInAnomaliesIndex[index]);
     }
     printf("\n");
+}
+
+void ErdbAnomalyDiscovery::getDensityCurve(DensityCurve &rOutDensityCurve)
+{
+    rOutDensityCurve = _densityCurve;
 }

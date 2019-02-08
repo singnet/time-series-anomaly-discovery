@@ -87,6 +87,10 @@ class Sequitur
 
   private:
     /**
+      * This method expand each grammar rule and generate a full output string. */
+    void getExpandedRuleVector(std::string rule, std::vector<std::string> &rOutSymbolVector);
+
+    /**
       * This method returns a rule and all its symbols.
       * The returned rule is from the grammar generated so far. */
     void getRule(int ruleCode, std::vector<std::string> &rOutRule);

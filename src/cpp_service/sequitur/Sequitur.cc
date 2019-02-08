@@ -189,11 +189,22 @@ int Sequitur::countSymbolInRules(const char *pInSymbol)
     std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
     for (; it != _rules.end(); it++)
     {
+        // do not count with rule 0
+        if (it->first == "~0")
+        {
+            continue;
+        }
+
+        //std::vector<std::string> expanded_rule;
+        //getExpandedRuleVector(it->first, expanded_rule);
         for (int symbol = 0; symbol < it->second.size(); symbol++)
         {
             if (it->second[symbol] == pInSymbol)
             {
                 count++;
+
+                // need to break since this rule already covers this subsequence
+                break;
             }
         }
     }
@@ -317,6 +328,26 @@ void Sequitur::printGrammar()
         printf("\n");
     }
     printf("\n");
+}
+
+void Sequitur::getExpandedRuleVector(std::string rule, std::vector<std::string> &rOutSymbolVector)
+{
+    // clear out string to ensure that the op. will be performed ok
+    std::vector<std::string> &rules_symbols = _rules[rule];
+
+    for (unsigned int symbol = 0; symbol < rules_symbols.size(); symbol++)
+    {
+        std::string current_symbol = rules_symbols[symbol];
+
+        if (isRule(current_symbol))
+        {
+            getExpandedRuleVector(current_symbol, rOutSymbolVector);
+        }
+        else
+        {
+            rOutSymbolVector.push_back(current_symbol);
+        }
+    }
 }
 
 void Sequitur::expandGrammar(std::string rule, std::string &rOutString)

@@ -64,7 +64,7 @@ class DensityCurve
     /**
       * This method counts how many times each symbol from the current density curve
       * appears in the sequitur's instance generated grammar so far. */
-    void updateDensityCurve(Sequitur &rInSequitur);
+    void updateDensityCurve(Sequitur &rInSequitur, const int thresholdValue = -1);
 
     /**
       * This method returns the global mininum intervals for the density curve updated so far. */
@@ -81,6 +81,10 @@ class DensityCurve
     /**
       * This method returns the local max intervals for the density curve updated so far. */
     void getLocalMaxDensities(std::vector<int> &rOutVec);
+
+    /**
+      * This method returns the detected anomalies, where the detection method is based on a threshold value. */
+    void getThresholdDetectedAnomalies(std::vector<int> &rOutVec);
 
     /**
       * This method prints the current density curve so far. */
@@ -105,6 +109,7 @@ class DensityCurve
     std::vector<int> _localMaxPoints; ///< local maximum intervals
     std::vector<int> _globalMaxPoints; ///< global maximum intervals
     std::vector<int> _globalMinPoints; ///< global minimum intervals
+    std::vector<int> _thresholdDetectedAnomalies; ///< detected anomalies by threshold
     double _mean; ///< curve mean
     double _standardDeviation; ///< curve standard deviation
     double _minDensity; ///< curve minimum density

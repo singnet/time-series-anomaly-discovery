@@ -76,7 +76,7 @@ Basically, this command will install the GRPC c++ library, the DAEMON to handle 
 apt-get update;\
 
 # try to install all recommended software
-apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+apt-get install -y cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
                    libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                    wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
 
@@ -139,7 +139,7 @@ make clean; make
 After building the source, run the GPRC server with following command. It will run the server in background mode. 
 
 ```
-./bin/server &
+./bin/server.out &
 ```
 
 ## Step 3 - Calling GRPC server locally
@@ -147,7 +147,7 @@ After building the source, run the GPRC server with following command. It will r
 After running the server, run the client with the command presented bellow. With the presented example input parameters, the algorithms should be able to detect simulated spikes in the input time series. A spike is represented by the number 1000 while a normal sample is represented by the number 1.
 
 ```
-./bin/client "1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 100" "a b c d e f g h i j" 4 2 0
+./bin/client.out "1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 100" "a b c d e f g h i j" 4 2 0
 ```
 
 Expected output:

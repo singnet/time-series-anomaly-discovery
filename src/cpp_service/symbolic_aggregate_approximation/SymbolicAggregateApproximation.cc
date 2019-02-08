@@ -82,7 +82,7 @@ std::string SymbolicAggregateApproximation::sax(const int paaSize, const int sta
             s_end = start + range;
         }
     }
-
+    
     // get subsequence from the normalized series
     std::vector<double> znormed_subsequence;
     znormed_subsequence.assign(_rZNormTimeSeries.begin() + s_start, _rZNormTimeSeries.begin() + s_end);

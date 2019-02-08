@@ -54,6 +54,23 @@ jobs:
             echo "Finished."
           EOF
     - run:
+        name: Perform unit tests
+        command: |
+          # staging and production container names
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+
+          ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
+            # Build source and run tests
+            echo "Building source inside staging container and performing integration tests..."
+            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+              "cd /home/ubuntu/$REPOSITORY; \
+               make clean; \
+               make; \
+               ./bin/cxxUnitTestsRunner.out"
+            echo "Finished."
+          EOF
+    - run:
         name: Perform integration tests
         command: |
           # staging and production container names
@@ -65,8 +82,9 @@ jobs:
             echo "Building source inside staging container and performing integration tests..."
             docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
+               make clean; \
                make; \
-               ./bin/deployTests"
+               ./bin/integrationTests.out"
             echo "Finished."
           EOF
     - run:
@@ -86,13 +104,13 @@ jobs:
               docker rm $PROD_DOCKER_CONTAINER_NAME || true
               echo "Finished."
 
-              # stop staging container to the new producton one
+              # stop staging container
               echo "Stopping and removing staging container..."
               docker stop $STAGING_DOCKER_CONTAINER_NAME || true
               docker rm $STAGING_DOCKER_CONTAINER_NAME || true 
               echo "Finished."
 
-              # running the cpp service container, service daemon and server
+              # running the cpp service container, service daemon and server in a production container
               echo "Creating production container..."
               docker run -tdi -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT --name $PROD_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME /bin/bash -c \
                 "mkdir /home/ubuntu; \
