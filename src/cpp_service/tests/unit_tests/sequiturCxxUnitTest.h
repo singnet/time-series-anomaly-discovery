@@ -158,7 +158,7 @@ void SequiturCxxUnitTest::test_smallAlphabetHugeInput()
     {
         for (unsigned int alphabetSize = minAlphabetSize; alphabetSize <= maxAlphabetSize; alphabetSize++)
         {
-            callSequitur(alphabetSize, inputSize);
+            //callSequitur(alphabetSize, inputSize);
         }
     }
 

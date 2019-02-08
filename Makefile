@@ -96,14 +96,14 @@ server:
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
 		/usr/local/lib/libgrpc++.so\
-		$(SERVER_DEPS)
+		$(SERVER_DEPS) -lcurl
 
 client:
 	$(CXX) $^ $(LDFLAGS) -o ./bin/client.$(EXT)\
 		$(OBJ_FOLDER)/client.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
-		/usr/local/lib/libgrpc++.so
+		/usr/local/lib/libgrpc++.so -lcurl
 
 cxx_main:
 	$(CXX) $^ $(LDFLAGS) -o ./bin/cxxUnitTestsRunner.$(EXT)\
@@ -111,13 +111,14 @@ cxx_main:
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
 		/usr/local/lib/libgrpc++.so\
-		$(SERVER_DEPS)
+		/usr/lib/x86_64-linux-gnu/libcurl.so\
+		$(SERVER_DEPS) -lcurl
 
 debug:
-	$(CXX) -o ./bin/sandBoxMain.$(EXT) $(OBJ_FOLDER)/sandBoxMain.o $(SERVER_DEPS)
+	$(CXX) $^ $(LDFLAGS) -o ./bin/sandBoxMain.$(EXT) $(OBJ_FOLDER)/sandBoxMain.o $(SERVER_DEPS) -lcurl
 
 test_bin:
-	$(CXX) -o ./bin/integrationTests.$(EXT) $(OBJ_FOLDER)/integrationTestsMain.o
+	$(CXX) $^ $(LDFLAGS) -o ./bin/integrationTests.$(EXT) $(OBJ_FOLDER)/integrationTestsMain.o -lcurl
 
 cxx_unit_tests_gen:
 	@cxxtestgen --error-printer -o runner.cc $(SOURCE_FOLDER)/tests/unit_tests/*.h

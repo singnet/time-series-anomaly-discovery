@@ -80,13 +80,20 @@ void ErdbAnomalyDiscovery::insertSample(const double sample)
     }
 }
 
-void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString, const int threshold, bool debug)
+void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString, int threshold, bool debug)
 {
     // update density curve and calculate max and min, globall and locals
     _densityCurve.updateDensityCurve(_sequitur, threshold);
 
     // get anomalies with the efficient rule density-base anomaly discovery method
-    _densityCurve.getThresholdDetectedAnomalies(rOutAnomaliesIndex);
+    if (threshold > 1)
+    {
+        _densityCurve.getThresholdDetectedAnomalies(rOutAnomaliesIndex);
+    }
+    else
+    {
+        _densityCurve.getGlobalMinDensities(rOutAnomaliesIndex);
+    }
 
     // extract string if output string is non-null
     if (pOutAnomaliesIndexString != nullptr)
@@ -100,11 +107,20 @@ void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, st
     {
         printf("\n\n---- request ----\n\nReceived time series:\n");
         printSeries(_timeSeries);
+
+        printf("\nAlphabet:\n");
+        for (int i = 0; i < _saxAlphabet.size(); i++)
+        {
+            printf("%s ", _saxAlphabet[i].c_str());
+        }
+        printf("\n");
+
         printf("\nSliding window size: %d\npaa size: %d\n", _slidingWindowSize, _paaSize);
         printf("\nGenerated sequitur grammar:\n\n");
         _sequitur.printGrammar();
         printf("\nDensity curve statistics:\n\n");
         _densityCurve.printDensityCurve();
+        _densityCurve.saveCsv("last_density_curve.csv");
         printf("\nAnomalies index:\n\n");
         printAnomalies(rOutAnomaliesIndex);
     }

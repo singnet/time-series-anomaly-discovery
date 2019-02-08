@@ -30,12 +30,14 @@ class ServiceClient
 
     void run(int argc, char **argv)
     {
-        if (argc < 6){
+        if (argc < 7){
             printf("\n\nTime series anomaly discovery service\n\n");
-            printf("input:\n\t<time series string> values: numbers separated by spaces ex: \"1 2 3 1 2 100 200 1\"");
-            printf("\n\t<alphabet> values: letters separated by spaces ex: \"a b c d e f g h i j\"");
+            printf("input:\n\t<time series url string> values: url string containing a time series csv file");
             printf("\n\t<sliding window size> values: number greater than 0 ex: \"10\"");
+            printf("\n\t<alphabet> size: size of the alphabet ex: \"1\" or \"2\", etc");
             printf("\n\t<paa size> values: number greater than 0 ex: \"2\"");
+            printf("\n\t<detection threshold> values: number greater than 0 ex: \"2\"");
+            printf("\n\t<numerosity reduction> values: number greater than 0 ex: \"2\"");
             printf("\n\t<debug flag> values: \"1\" or \"0\"\n\n");
             exit(-1);
         }
@@ -45,10 +47,11 @@ class ServiceClient
 
         // set input parameter here
         input.set_timeseries(argv[1]);
-        input.set_alphabet(argv[2]);
-        input.set_slidingwindowsize(argv[3]);
+        input.set_slidingwindowsize(argv[2]);
+        input.set_alphabet(argv[3]);
         input.set_paasize(argv[4]);
-        input.set_debugflag(argv[5]);
+        input.set_detectionthreshold(argv[5]);
+        input.set_debugflag(argv[6]);
 
         ClientContext context;
         Status status = stub_->detectAnomalies(&context, input, &output);

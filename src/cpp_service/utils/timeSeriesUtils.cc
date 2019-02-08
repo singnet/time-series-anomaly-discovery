@@ -3,6 +3,7 @@
 
 #include "timeSeriesUtils.h"
 #include "utilsImpl.h"
+#include "utils.h"
 
 using namespace timeSeries;
 
@@ -26,13 +27,26 @@ void timeSeries::zNorm(std::vector<double> &rInSubSequence, std::vector<double> 
     int start = 0;
     int range = rInSubSequence.size();
 
-    double mean_val = mean<double, double>(rInSubSequence, start, range);
-    double deviation_val = standardDeviation<double, double>(mean_val, rInSubSequence, start, range);
+    double mean = 0.0;
+    for (int i = 0; i < range; i++)
+    {
+        mean += rInSubSequence[i];
+    }
+    mean = mean / (double)rInSubSequence.size();
 
+    //double mean_val = mean<double, double>(rInSubSequence, start, range);
+    //double deviation_val = standardDeviation<double, double>(mean_val, rInSubSequence, start, range);
+    double dist_mean_sum = 0.0;
+    for (int i = 0; i < range; i++)
+    {
+        dist_mean_sum += std::pow(mean - rInSubSequence[i], 2.0);
+    }
+    double deviation_val = std::sqrt(dist_mean_sum / ((double)rInSubSequence.size() - 1.0));
+    
     // normalize each sample
     for (unsigned int sample = 0; sample < rInSubSequence.size(); sample++)
     {
-        rOutNormalizedSubSequence.push_back((rInSubSequence[sample] - mean_val) / deviation_val);
+        rOutNormalizedSubSequence.push_back((rInSubSequence[sample] - mean) / deviation_val);
     }
 }
 
@@ -107,4 +121,27 @@ void timeSeries::loadSeriesCsv(const char *pInOutputFile, std::vector<double> &r
     }
 
     fclose(pSeriesFile);
+}
+
+void timeSeries::loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, const bool hasHeader)
+{
+    std::string tmp_series_file_name = "";
+    std::string error_msg = "";
+    CURLcode error_code = loadUrlFile(error_msg, pInUrl, tmp_series_file_name);
+
+    if (error_code)
+    {
+        // TODO:handle error
+    }
+    else
+    {
+        loadSeriesCsv(tmp_series_file_name.c_str(), rOutSeries, hasHeader);
+    }
+
+    // remove temp file
+    if (remove(tmp_series_file_name.c_str()))
+    {
+        std::string msg = "loadSeriesURL(): Error deleting temporary file: ";
+        // TODO:handle error
+    }
 }

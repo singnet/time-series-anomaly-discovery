@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     // load time series
     std::vector<double> time_series;
-    loadSeriesCsv(argv[1], time_series, false);
+    loadSeriesURL(argv[1], time_series, false);
 
     // load window size
     int sliding_window_size = atoi(argv[2]);
@@ -28,6 +28,9 @@ int main(int argc, char *argv[])
 
     // load detection threshold
     int detection_threshold = atoi(argv[5]);
+
+    // numerosity reduction arg
+    int numerosity_reduction = atoi(argv[6]);
 
     // generate alphabet
     std::vector<std::string> alphabet;
@@ -47,7 +50,8 @@ int main(int argc, char *argv[])
 
     // for all conditions of sequitur to be applied, generate the density curve statistics, and get detected anomalies
     std::vector<int> detected_anomalies_index;
-    anomaly_discovery.getAnomalies(detected_anomalies_index, nullptr, detection_threshold, false);
+    std::string anomaly_indexes_string;
+    anomaly_discovery.getAnomalies(detected_anomalies_index, &anomaly_indexes_string, detection_threshold, true);
 
     for (unsigned int anomaly = 0; anomaly < detected_anomalies_index.size(); anomaly++)
     {
@@ -57,6 +61,13 @@ int main(int argc, char *argv[])
 
     DensityCurve curve;
     anomaly_discovery.getDensityCurve(curve);
+
+    std::string correct_answer = "17 459 460 461 462 463 464 465 466 ";
+
+    if(anomaly_indexes_string != correct_answer)
+    {
+        printf("ERROR!");
+    }
 
     curve.saveCsv("DensityCurve");
 

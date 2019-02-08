@@ -121,16 +121,14 @@ void DensityCurve::findLocalMinMaxIntervals()
 
 void DensityCurve::updateDensityCurve(Sequitur &rInSequitur, const int thresholdValue)
 {
-    int threshold_value = 1.0;
+    int threshold_value = 2;
 
-    if (thresholdValue >= 0)
+    if (thresholdValue > 1)
     {
         threshold_value = thresholdValue;
     }
-    else
-    {
-        threshold_value = thresholdValue;
-    }
+
+    printf("\n\nTHRESHOLD VALUE %d\n\n", threshold_value);
 
     _minDensity = std::numeric_limits<double>::max();
     _maxDensity = 0.0;

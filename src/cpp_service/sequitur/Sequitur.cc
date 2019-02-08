@@ -267,7 +267,7 @@ bool Sequitur::generateRules()
     return grammar_updated;
 }
 
-void Sequitur::insertSymbol(const char *pInSymbol, bool discardEquals)
+void Sequitur::insertSymbol(const char *pInSymbol)
 {
     if (_debug)
     {
@@ -276,23 +276,9 @@ void Sequitur::insertSymbol(const char *pInSymbol, bool discardEquals)
 
     int primary_symbol_length = _rules["~0"].size();
     int minimum_symbol_length = 4;
-    bool insert_newword = true;
 
-    // ignore repeated words for better compression, it is indispensable for the correct working of the algorithm
-    if (_lastInsertedSymbol.length() > 0 && discardEquals)
-    {
-        if (_lastInsertedSymbol == pInSymbol)
-        {
-            insert_newword = false;
-        }
-    }
-
-    // allow multi char input symbols and rules
-    if (insert_newword)
-    {
-        _rules["~0"].push_back(std::string(pInSymbol));
-        _lastInsertedSymbol.assign(pInSymbol);
-    }
+    _rules["~0"].push_back(std::string(pInSymbol));
+    _lastInsertedSymbol.assign(pInSymbol);
 
     bool grammar_updated = false;
     do

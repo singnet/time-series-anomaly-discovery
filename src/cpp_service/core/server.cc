@@ -8,7 +8,8 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/security/server_credentials.h>
 
-#include "../session_manager/SessionManager.h"
+#include "../anomaly_discovery/ErdbAnomalyDiscovery.h"
+#include "../utils/timeSeriesUtils.h"
 #include "timeSeriesAnomalyDetection.grpc.pb.h"
 
 using grpc::Server;
@@ -39,29 +40,28 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
                    std::vector<std::string> &rOutAlphabet,
                    int &rOutSlidingWindowRange,
                    int &rOutpaaSize,
+                   int &rOutDetectionThreshold,
                    bool &rOutDebugStatus)
     {     
         // build up time series from arg 0
-        std::vector<std::string> time_series_string;
-        boost::split(time_series_string, pInInputArgs->timeseries(), [](char c) { return c == ' '; });
-        for (int sample = 0; sample < time_series_string.size(); sample++)
-        {
-            rOutTimeSeries.push_back(atoi(time_series_string[sample].c_str()));
-        }
+        loadSeriesURL(pInInputArgs->timeseries().c_str(), rOutTimeSeries, false);
 
         // build up alphabet
+        int alphabet_size = atoi(pInInputArgs->alphabet().c_str());
         std::vector<std::string> alphabet_string;
-        boost::split(alphabet_string, pInInputArgs->alphabet(), [](char c) { return c == ' '; });
-        for (int sample = 0; sample < alphabet_string.size(); sample++)
+        for (int sample = 0; sample < alphabet_size; sample++)
         {
-            rOutAlphabet.push_back(alphabet_string[sample]);
+            rOutAlphabet.push_back(std::to_string(sample));
         }
 
         // get sliding window range
-        rOutSlidingWindowRange = atof(pInInputArgs->slidingwindowsize().c_str());
+        rOutSlidingWindowRange = atoi(pInInputArgs->slidingwindowsize().c_str());
 
         // get paa size
-        rOutpaaSize = atof(pInInputArgs->paasize().c_str());
+        rOutpaaSize = atoi(pInInputArgs->paasize().c_str());
+
+        // get detection threshold
+        rOutDetectionThreshold = atoi(pInInputArgs->detectionthreshold().c_str());
 
         // get debug status
         rOutDebugStatus = atoi(pInInputArgs->debugflag().c_str());
@@ -75,25 +75,41 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         int sliding_window_range;
         int paa_size;
         bool debug_status;
-
+        int detection_threshold;
+        
         // get arguments from input
-        buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, debug_status);
+        buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, detection_threshold, debug_status);
+
+        printf("\n\nReceived request: \n");
+        printf("Time Series: %s\n", pInInput->timeseries().c_str());
+        printf("sliding_window_range: %s\n", pInInput->slidingwindowsize().c_str());
+        printf("alphabet_size: %s\n", pInInput->alphabet().c_str());
+        printf("paa_size: %s\n", pInInput->paasize().c_str());
+        printf("detection_threshold: %s\n", pInInput->detectionthreshold().c_str());
+        printf("debug_status: %s\n\n", pInInput->debugflag().c_str());
 
         // create an anomaly discovery object
-        ErdbAnomalyDiscovery anomaly_discovery(alphabet, sliding_window_range, paa_size);
+        ErdbAnomalyDiscovery* anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
 
         // insert received time series into this anomaly detector
-        anomaly_discovery.insertTimeSeries(time_series);
+        for (unsigned int sample = 0; sample < time_series.size(); sample++)
+        {
+            anomaly_discovery->insertSample(time_series[sample]);
+        }
 
         // for all conditions of sequitur to be applied, generate the density curve statistics, and get detected anomalies
         std::vector<int> detected_anomalies_index;
 
         // convert anomalies into and output string
         std::string output_string = "";
-        anomaly_discovery.getAnomalies(detected_anomalies_index, &output_string, debug_status);
+        anomaly_discovery->getAnomalies(detected_anomalies_index, &output_string, detection_threshold, debug_status);
+
+        printf("\n\nLOG DETECTED ANOMALIES IN SERVER\n\n%s\n\n", output_string.c_str());
 
         // set output for this service
         pOutput->set_output(output_string.c_str());
+
+        delete anomaly_discovery;
         return Status::OK;
     }
 };

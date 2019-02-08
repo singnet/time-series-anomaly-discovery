@@ -43,10 +43,10 @@ static int runTests(char *pInTestFolderName)
 
     if (serverPID == 0) {
         int fd = open("/dev/null", O_WRONLY | O_CREAT, 0666);
-        dup2(fd, 1); // replace stdout
-        execl("./bin/server", "./bin/server", (char *) 0);
+        //dup2(fd, 1); // replace stdout
+        execl("./bin/server.out", "./bin/server.out", (char *) 0);
     } else {
-        sleep(1); // wait for server to be ready
+        sleep(2); // wait for server to be ready
         printf("Runing tests for %s...\n", pInTestFolderName);
         string fname = TESTS_DIR;
         fname += "/";
@@ -66,8 +66,9 @@ static int runTests(char *pInTestFolderName)
 
         auto testCases = jHash["test-cases"];
         for (auto tcase : testCases) {
-            cmdLine = "./bin/client ";
+            cmdLine = "./bin/client.out ";
             cmdLine += tcase["input"].get<string>();
+            printf("\nCMD: %s\n", cmdLine.c_str());
             result = "";
             exec(result, cmdLine);
 

@@ -58,7 +58,7 @@ class Sequitur
       * If it does, then it will transform it into a grammar rule 
       * and start the process over again. It will do it until no more digrams
       * are available to be processed. */
-    void insertSymbol(const char *pInSymbol, bool discardEquals = false);
+    void insertSymbol(const char *pInSymbol);
 
     /**
       * This method sets the value of a debug flag.
