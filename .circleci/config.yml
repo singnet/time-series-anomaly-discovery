@@ -9,7 +9,7 @@ defaults: &defaults
     REPOSITORY: time-series-anomaly-discovery
 
     # cpp service base image, do not change this
-    BASE_CPP_IMAGE_NAME: cpp_service_base_image
+    BASE_CPP_IMAGE_NAME: "cpp_service_base_image"
       
 version: 2
 jobs:
