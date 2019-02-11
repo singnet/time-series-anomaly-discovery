@@ -119,8 +119,17 @@ void DensityCurve::findLocalMinMaxIntervals()
     }
 }
 
-void DensityCurve::updateDensityCurve(Sequitur &rInSequitur)
+void DensityCurve::updateDensityCurve(Sequitur &rInSequitur, const int thresholdValue)
 {
+    int threshold_value = 2;
+
+    if (thresholdValue > 1)
+    {
+        threshold_value = thresholdValue;
+    }
+
+    printf("\n\nTHRESHOLD VALUE %d\n\n", threshold_value);
+
     _minDensity = std::numeric_limits<double>::max();
     _maxDensity = 0.0;
     double mean = 0.0;
@@ -130,6 +139,11 @@ void DensityCurve::updateDensityCurve(Sequitur &rInSequitur)
         std::string current_point_symbol = _seriesWords[density_curve_point];
         int count = rInSequitur.countSymbolInRules(current_point_symbol.c_str());
         _density[density_curve_point] = count;
+
+        if (count < threshold_value)
+        {
+            _thresholdDetectedAnomalies.push_back(density_curve_point);
+        }
 
         // compute mean sum
         mean += (double)count;
@@ -178,4 +192,9 @@ void DensityCurve::getLocalMinDensities(std::vector<int> &rOutVec)
 void DensityCurve::getLocalMaxDensities(std::vector<int> &rOutVec)
 {
     rOutVec.assign(_localMaxPoints.begin(), _localMaxPoints.end());
+}
+
+void DensityCurve::getThresholdDetectedAnomalies(std::vector<int> &rOutVec)
+{
+    rOutVec.assign(_thresholdDetectedAnomalies.begin(), _thresholdDetectedAnomalies.end());
 }

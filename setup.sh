@@ -209,6 +209,23 @@ jobs:
             echo \"Finished.\"
           EOF
     - run:
+        name: Perform unit tests
+        command: |
+          # staging and production container names
+          STAGING_DOCKER_CONTAINER_NAME=\"staging_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
+          PROD_DOCKER_CONTAINER_NAME=\"prod_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
+
+          ssh -o \"StrictHostKeyChecking no\" \$SSH_USER@\$SSH_HOST << EOF
+            # Build source and run tests
+            echo \"Building source inside staging container and performing integration tests...\"
+            docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
+              \"cd /home/ubuntu/\$REPOSITORY; \\
+               make clean; \\
+               make; \\
+               ./bin/cxxUnitTestsRunner.out\"
+            echo \"Finished.\"
+          EOF
+    - run:
         name: Perform integration tests
         command: |
           # staging and production container names
@@ -220,8 +237,9 @@ jobs:
             echo \"Building source inside staging container and performing integration tests...\"
             docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
               \"cd /home/ubuntu/\$REPOSITORY; \\
+               make clean; \\
                make; \\
-               ./bin/deployTests\"
+               ./bin/integrationTests.out\"
             echo \"Finished.\"
           EOF
     - run:
@@ -294,7 +312,7 @@ FROM ubuntu:18.04
 RUN apt-get update
 
 # install deps
-RUN apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+RUN apt-get install -y libcurl4-gnutls-dev cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
                        libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                        wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev
 
@@ -330,7 +348,7 @@ run()
     snetd --config snetd.config.json & 
     
     # run server
-    ./bin/server
+    ./bin/server.out
 }
 
 compileAndTest()
@@ -338,8 +356,11 @@ compileAndTest()
     # build source
     make clean; make
 
-    # run tests
-    ./bin/deployTests
+    echo "Running unit tests..."
+    ./bin/cxxUnitTestsRunner.out
+
+    echo "Running integration tests..."
+    ./bin/integrationTests.out
 }
 
 callService()
@@ -376,7 +397,7 @@ callService()
 
 if [ $INSTALL_VAR == 1 ]; then
     apt-get update;\
-    apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+    apt-get install -y cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
                        libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                        wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
 

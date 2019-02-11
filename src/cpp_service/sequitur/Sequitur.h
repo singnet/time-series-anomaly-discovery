@@ -58,7 +58,7 @@ class Sequitur
       * If it does, then it will transform it into a grammar rule 
       * and start the process over again. It will do it until no more digrams
       * are available to be processed. */
-    void insertSymbol(const char *pInSymbol, bool discardEquals = false);
+    void insertSymbol(const char *pInSymbol);
 
     /**
       * This method sets the value of a debug flag.
@@ -86,6 +86,10 @@ class Sequitur
     void expandGrammar(std::string rule, std::string &rOutString);
 
   private:
+    /**
+      * This method expand each grammar rule and generate a full output string. */
+    void getExpandedRuleVector(std::string rule, std::vector<std::string> &rOutSymbolVector);
+
     /**
       * This method returns a rule and all its symbols.
       * The returned rule is from the grammar generated so far. */

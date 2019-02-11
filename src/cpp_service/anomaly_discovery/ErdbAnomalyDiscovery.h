@@ -79,11 +79,15 @@ class ErdbAnomalyDiscovery
       * It will then compute the density curve max and min intervals to output as anomalies. 
       * Anomalies are returned in two forms, a vector with the detected anomalies samples and
       * a string containing the detected samples separated by spaces. */
-    void getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString = nullptr, bool debug = false);
+    void getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString = nullptr, int threshold = -1, bool debug = false);
 
     /**
       * This method print the vector of detected anomalies. */
     void printAnomalies(std::vector<int> &rInAnomaliesIndex);
+
+    /**
+      * This method returns this object density curve. */
+    void getDensityCurve(DensityCurve &rOutDensityCurve);
 
   private:
     std::vector<std::string> _saxAlphabet; ///< used alphabet

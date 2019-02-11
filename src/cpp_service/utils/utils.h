@@ -30,6 +30,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <curl/curl.h>
 
 namespace timeSeries
 {
@@ -54,6 +55,11 @@ void discordDiscoveryBruteForce(std::vector<double> &rInSeries,
   * This method allows to check if a given two reference points from different sequences,
   * they are a self match. */
 bool isSelfMatch(const int startA, const int startB, const int windowSize);
+
+/**
+  * This method allows to load files and stores them into temporary files.
+  */
+CURLcode loadUrlFile(std::string &errorMessage, const std::string &rUrl, std::string &rOutputFileName);
 
 } // namespace timeSeries
 

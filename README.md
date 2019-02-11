@@ -76,7 +76,7 @@ Basically, this command will install the GRPC c++ library, the DAEMON to handle 
 apt-get update;\
 
 # try to install all recommended software
-apt-get install -y nlohmann-json-dev build-essential autoconf libtool pkg-config \
+apt-get install -y cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
                    libgflags-dev libgtest-dev clang libc++-dev git curl nano \
                    wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
 
@@ -139,7 +139,7 @@ make clean; make
 After building the source, run the GPRC server with following command. It will run the server in background mode. 
 
 ```
-./bin/server &
+./bin/server.out &
 ```
 
 ## Step 3 - Calling GRPC server locally
@@ -147,13 +147,13 @@ After building the source, run the GPRC server with following command. It will r
 After running the server, run the client with the command presented bellow. With the presented example input parameters, the algorithms should be able to detect simulated spikes in the input time series. A spike is represented by the number 1000 while a normal sample is represented by the number 1.
 
 ```
-./bin/client "1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 1000 1 1 1 1 1 100" "a b c d e f g h i j" 4 2 0
+./bin/client.out https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/data/ecg0606_1.csv 100 3 2 1 0
 ```
 
 Expected output:
 
 ```
-4 5 10 11 16 17 22 23
+17 459 460 461 462 463 464 465 466 
 ```
 
 The presented output represents the indexes in which anomalies were detected in the original time series beginning at index 0.
@@ -161,18 +161,21 @@ The presented output represents the indexes in which anomalies were detected in 
 ## Parameters Explanation
 
 * arg [1]
-   * Type = String numbers separated by spaces.
-   * Represents: The time series in which anomalies will be detected.
+   * Type = String
+   * Represents: An URL containing a time series csv file.
 * arg [2]
-   * Type = String symbols separated by spaces.
-   * Represents: Alphabet used to discretizise the paa apporximation.
-* arg [3]
    * Type = Integer
    * Represents: Sliding window size used to create the time series symbols to build the free context grammar through the Sequitur algorithm.
+* arg [3]
+   * Type = Integer
+   * Represents: Alphabet size.
 * arg [4]
    * Type = Integer
    * Represents: Piecewise Aggregate Approximation defining the number of sub-samples that will be generated for each sliding window position.
 * arg [5]
+   * Type = Integer
+   * Represents: Density curve detection threshold.
+* arg [6]
    * Type = Integer
    * Represents: Debug printing flag, where 0 is false and 1 is true.
 

@@ -78,6 +78,10 @@ void saveSeriesCsv(const char *pInOutputFile, std::vector<double> &rInSeries);
   * The name of the input file path is specified in the input parameter. */
 void loadSeriesCsv(const char *pInOutputFile, std::vector<double> &rOutSeries, const bool hasHeader);
 
+/**
+  * This method allows to load time series from the set URL. */
+void loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, const bool hasHeader);
+
 } // namespace timeSeries
 
 #endif

@@ -189,11 +189,22 @@ int Sequitur::countSymbolInRules(const char *pInSymbol)
     std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
     for (; it != _rules.end(); it++)
     {
+        // do not count with rule 0
+        if (it->first == "~0")
+        {
+            continue;
+        }
+
+        //std::vector<std::string> expanded_rule;
+        //getExpandedRuleVector(it->first, expanded_rule);
         for (int symbol = 0; symbol < it->second.size(); symbol++)
         {
             if (it->second[symbol] == pInSymbol)
             {
                 count++;
+
+                // need to break since this rule already covers this subsequence
+                break;
             }
         }
     }
@@ -256,7 +267,7 @@ bool Sequitur::generateRules()
     return grammar_updated;
 }
 
-void Sequitur::insertSymbol(const char *pInSymbol, bool discardEquals)
+void Sequitur::insertSymbol(const char *pInSymbol)
 {
     if (_debug)
     {
@@ -265,23 +276,9 @@ void Sequitur::insertSymbol(const char *pInSymbol, bool discardEquals)
 
     int primary_symbol_length = _rules["~0"].size();
     int minimum_symbol_length = 4;
-    bool insert_newword = true;
 
-    // ignore repeated words for better compression, it is indispensable for the correct working of the algorithm
-    if (_lastInsertedSymbol.length() > 0 && discardEquals)
-    {
-        if (_lastInsertedSymbol == pInSymbol)
-        {
-            insert_newword = false;
-        }
-    }
-
-    // allow multi char input symbols and rules
-    if (insert_newword)
-    {
-        _rules["~0"].push_back(std::string(pInSymbol));
-        _lastInsertedSymbol.assign(pInSymbol);
-    }
+    _rules["~0"].push_back(std::string(pInSymbol));
+    _lastInsertedSymbol.assign(pInSymbol);
 
     bool grammar_updated = false;
     do
@@ -317,6 +314,26 @@ void Sequitur::printGrammar()
         printf("\n");
     }
     printf("\n");
+}
+
+void Sequitur::getExpandedRuleVector(std::string rule, std::vector<std::string> &rOutSymbolVector)
+{
+    // clear out string to ensure that the op. will be performed ok
+    std::vector<std::string> &rules_symbols = _rules[rule];
+
+    for (unsigned int symbol = 0; symbol < rules_symbols.size(); symbol++)
+    {
+        std::string current_symbol = rules_symbols[symbol];
+
+        if (isRule(current_symbol))
+        {
+            getExpandedRuleVector(current_symbol, rOutSymbolVector);
+        }
+        else
+        {
+            rOutSymbolVector.push_back(current_symbol);
+        }
+    }
 }
 
 void Sequitur::expandGrammar(std::string rule, std::string &rOutString)

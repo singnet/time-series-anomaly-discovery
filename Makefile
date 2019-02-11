@@ -57,8 +57,10 @@ SOURCE_FOLDER := ./src/cpp_service
 HEADER_FOLDER := ./src/cpp_service
 BIN_FOLDER := ./bin
 OBJ_FOLDER := "./bin/object"
+EXT := out
 
 # source code by folder
+SOURCE += ./*.cc
 SOURCE += $(SOURCE_FOLDER)/symbolic_aggregate_approximation/*.cc
 SOURCE += $(SOURCE_FOLDER)/piecewise_aggregate_approximation/*.cc
 SOURCE += $(SOURCE_FOLDER)/density_curve/*.cc
@@ -83,28 +85,43 @@ SERVER_DEPS += $(OBJ_FOLDER)/timeSeriesUtils.o
 SERVER_DEPS += $(OBJ_FOLDER)/SessionManager.o
 SERVER_DEPS += $(OBJ_FOLDER)/utils.o
 
-all: grpcProto genDebugObj unit_tests_debug genObj server client test_bin 
+all: cxx_unit_tests_gen grpcProto genDebugObj debug cxx_main genObj server client test_bin mv_files
+
+mv_files:
+	@mv ./runner.cc $(SOURCE_FOLDER)/tests/unit_tests/
 
 server:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/server\
+	$(CXX) $^ $(LDFLAGS) -o ./bin/server.$(EXT)\
 		$(OBJ_FOLDER)/server.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
 		/usr/local/lib/libgrpc++.so\
-		$(SERVER_DEPS)
+		$(SERVER_DEPS) -lcurl
 
 client:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/client\
+	$(CXX) $^ $(LDFLAGS) -o ./bin/client.$(EXT)\
 		$(OBJ_FOLDER)/client.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
-		/usr/local/lib/libgrpc++.so
+		/usr/local/lib/libgrpc++.so -lcurl
 
-unit_tests_debug:
-	$(CXX) -o ./bin/unitTests $(OBJ_FOLDER)/unitTestsMain.o $(SERVER_DEPS)
+cxx_main:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/cxxUnitTestsRunner.$(EXT)\
+		$(OBJ_FOLDER)/runner.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
+		/usr/local/lib/libgrpc++.so\
+		/usr/lib/x86_64-linux-gnu/libcurl.so\
+		$(SERVER_DEPS) -lcurl
+
+debug:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/sandBoxMain.$(EXT) $(OBJ_FOLDER)/sandBoxMain.o $(SERVER_DEPS) -lcurl
 
 test_bin:
-	$(CXX) -o ./bin/deployTests $(OBJ_FOLDER)/deployTestsMain.o
+	$(CXX) $^ $(LDFLAGS) -o ./bin/integrationTests.$(EXT) $(OBJ_FOLDER)/integrationTestsMain.o -lcurl
+
+cxx_unit_tests_gen:
+	@cxxtestgen --error-printer -o runner.cc $(SOURCE_FOLDER)/tests/unit_tests/*.h
 
 grpcProto: $(GRPC_PROTO_OBJ)
 	@mv timeSeriesAnomalyDetection.pb.cc\
@@ -113,20 +130,21 @@ grpcProto: $(GRPC_PROTO_OBJ)
 		timeSeriesAnomalyDetection.grpc.pb.h $(SOURCE_FOLDER)/core
 
 genDebugObj:
-	$(CXX) $(CXXFLAGS) $(CXX_DEBUG_FLAG) -I$(HEADER_FOLDER) -c $(SOURCE)
+	$(CXX) $(CXXFLAGS) $(CXX_DEBUG_FLAG) -I$(HEADER_FOLDER) -I./include/cxxtest -c $(SOURCE)
 	@mv *.o $(OBJ_FOLDER)
 
 genObj:
-	$(CXX) $(CXXFLAGS) -I$(HEADER_FOLDER) -c $(SOURCE)
+	$(CXX) $(CXXFLAGS) -I$(HEADER_FOLDER) -I./include/cxxtest -c $(SOURCE)
 	@mv *.o $(OBJ_FOLDER)
 
 clean:
 	@rm -rf *.o\
+		./*.cc\
+		./*.h\
+		$(SOURCE_FOLDER)/tests/runner.cc\
 		$(SOURCE_FOLDER)/core/*.pb.cc\
 		$(SOURCE_FOLDER)/core/*.pb.h\
-		$(BIN_FOLDER)/server\
-		$(BIN_FOLDER)/client\
-		$(BIN_FOLDER)/deployTests\
+		$(BIN_FOLDER)/*.$(EXT)\
 		$(OBJ_FOLDER)/*.o\
 		./storage*\
 		./service_metadata.json\
