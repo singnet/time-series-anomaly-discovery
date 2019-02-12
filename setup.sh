@@ -193,6 +193,12 @@ jobs:
     - run:
         name: Start container based on base cpp-service image
         command: |
+          # check if base image exist
+          BASIC_IMAGE_STATUS=\"$(ssh -tt -o \"StrictHostKeyChecking no\" $SSH_USER@$SSH_HOST 'docker images --format \"{{.ID}}: {{.Repository}}\" $BASE_CPP_IMAGE_NAME')\"
+
+          echo $BASE_CPP_IMAGE_NAME
+          echo $BASIC_IMAGE_STATUS
+
           # staging and production container names
           STAGING_DOCKER_CONTAINER_NAME=\"staging_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
           PROD_DOCKER_CONTAINER_NAME=\"prod_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
@@ -203,6 +209,13 @@ jobs:
             docker stop \$STAGING_DOCKER_CONTAINER_NAME || true
             docker rm \$STAGING_DOCKER_CONTAINER_NAME || true
             echo \"Finished.\"
+
+            # check if base cpp image exists, if not then build it with the assigned name
+            if [ \"$BASIC_IMAGE_STATUS\" = \"\" ]; then
+              echo \"Creating base cpp service image since it does not exist\"
+              docker build --no-cache -t $BASE_CPP_IMAGE_NAME:latest https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/master/Dockerfiles/CppServiceBaseDockerfile
+              echo \"Finish...\"
+            fi
 
             # running the cpp service base container
             echo \"Running staging container based on the cpp basic service image...\"
@@ -289,11 +302,10 @@ jobs:
               # running the cpp service container, service daemon and server
               echo \"Creating production container...\"
               docker run -tdi -p \$SERVICE_DAEMON_PORT:\$SERVICE_DAEMON_PORT --name \$PROD_DOCKER_CONTAINER_NAME \$BASE_CPP_IMAGE_NAME /bin/bash -c \\
-                \"mkdir /home/ubuntu; \\
-                 cd /home/ubuntu; \\
+                \"cd /home/ubuntu; \\
                  git clone https://github.com/\$CIRCLE_PROJECT_USERNAME/\$REPOSITORY.git; \\
                  cd \$REPOSITORY; \\
-                 ./setup.sh -r\"
+                 ./setup.sh -dr\"
               echo \"Finished.\"
               echo \"Service is up.\"
             else
