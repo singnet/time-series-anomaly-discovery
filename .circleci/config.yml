@@ -5,7 +5,8 @@ defaults: &defaults
   environment:
 
     # service info, change this
-    SERVICE_DAEMON_PORT: 7090
+    SERVICE_DAEMON_PORT_KOVAN: 7090
+    SERVICE_DAEMON_PORT_ROPSTEN: 7091
     REPOSITORY: time-series-anomaly-discovery
 
     # cpp service base image, do not change this
@@ -20,7 +21,7 @@ jobs:
         name: Start container based on base cpp-service image
         command: |
           # check if base image exist
-          BASIC_IMAGE_STATUS="$(ssh -tt -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST 'docker images --format "{{.ID}}: {{.Repository}}" $BASE_CPP_IMAGE_NAME')"
+          BASIC_IMAGE_STATUS="$(ssh -tt -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST 'docker images --format "{{.ID}}: {{.Repository}}" cpp_*')"
 
           echo $BASE_CPP_IMAGE_NAME
           echo $BASIC_IMAGE_STATUS
@@ -126,7 +127,9 @@ jobs:
 
               # running the cpp service container, service daemon and server in a production container
               echo "Creating production container..."
-              docker run -tdi -p $SERVICE_DAEMON_PORT:$SERVICE_DAEMON_PORT \
+              docker run -tdi \
+              -p $SERVICE_DAEMON_PORT_KOVAN:$SERVICE_DAEMON_PORT_KOVAN \
+              -p $SERVICE_DAEMON_PORT_ROPSTEN:$SERVICE_DAEMON_PORT_ROPSTEN \
               -v /home/ubuntu/$REPOSITORY/config:/config \
               -v /home/ubuntu/$REPOSITORY/etcd:/etcd \
               -v /home/ubuntu/$REPOSITORY/storage-data-dir-1.etcd:/storage-data-dir-1.etcd \
