@@ -80,7 +80,7 @@ void loadSeriesCsv(const char *pInOutputFile, std::vector<double> &rOutSeries, c
 
 /**
   * This method allows to load time series from the set URL. */
-void loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, const bool hasHeader);
+void loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, bool &rOutStatus, const bool hasHeader);
 
 } // namespace timeSeries
 
