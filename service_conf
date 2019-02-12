@@ -1,24 +1,32 @@
+# basic service info
 REPOSITORY_NAME="time-series-anomaly-discovery"
+
+# publish info
 SERVICE_NAME="time-series-anomaly-discovery"
+SERVICE_DESCRIPTION="This service allows to detect anomalies in time series with grammar compression."
+REPO_URL="https://github.com/singnet/time-series-anomaly-discovery"
+TAGS='Anomaly Discovery Compression "Time Series"'
+NETWORK=ropsten
 WALLET="0xfe98f73A11f4fBc5623B0Aa966522fe016A82487"
 PRICE=0.00000001
 
-# network
+# networking
 SERVICE_SERVER_PORT=7055
 SERVICE_DAEMON_PORT=7090
 HOST_IP_ADDRESS=54.203.198.53
 
-# blockchain
+# blockchain DAEMON CONFIG
 ORGANIZATION_TO_PUBLISH="snet"
 IPFS_END_POINT="http://ipfs.singularitynet.io:80"
 CRIPTOCURRENCY_NETWORK="https://kovan.infura.io"
 REGISTRY_KEY="0xe331bf20044a5b24c1a744abc90c1fd711d2c08d"
 
 # test call input
-DEPLOY_TEST_CALL_INPUT="{\"timeseries\":\"1 1 1 1 1 300 1 1 1 1 1 300 1 1 1 1 1 300 1 1 1 1 1 1 300\", \
-                  \"alphabet\":\"a b c d e f\", \
-                  \"slidingwindowsize\":\"10\",
-                  \"paasize\":\"2\",
+DEPLOY_TEST_CALL_INPUT="{\"timeseries\":\"https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/data/ecg0606_1.csv\", \
+                  \"slidingwindowsize\":\"100\", \
+                  \"alphabet\":\"3\", \
+                  \"paasize\":\"2\", \
+                  \"detectionthreshold\":\"1\", \
                   \"debugflag\":\"0\"}"
 
 # function to call
