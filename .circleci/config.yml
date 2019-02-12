@@ -72,7 +72,6 @@ jobs:
             echo "Finished."
           EOF
     - run:
-    - run:
         name: Perform unit tests
         command: |
           # staging and production container names
