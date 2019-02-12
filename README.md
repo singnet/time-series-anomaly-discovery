@@ -72,43 +72,40 @@ Basically, this command will install the GRPC c++ library, the DAEMON to handle 
 <details><summary>Click here to see the commands called by './setup.sh -i'</summary><p>
     
 ```
-# update packages list
-apt-get update;\
+    apt-get update;\
+    apt-get install -y libcurl4-gnutls-dev cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
+                       libgflags-dev libgtest-dev clang libc++-dev git curl nano \
+                       wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
 
-# try to install all recommended software
-apt-get install -y cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
-                   libgflags-dev libgtest-dev clang libc++-dev git curl nano \
-                   wget libudev-dev libusb-1.0-0-dev nodejs npm python3 python3-pip libboost-all-dev;\
+    # try upgrade pip
+    pip install --upgrade pip; \
 
-# try upgrade pip
-pip install --upgrade pip; \
+    # install GRPC
+    cd /;\
+    git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
+    cd grpc; \
+    git submodule update --init; \
+    make; \
+    make install; \
+    cd third_party/protobuf; \
+    make install; \
+    cd /;\
 
-# install GRPC library
-cd /;\
-git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc; \
-cd grpc; \
-git submodule update --init; \
-make; \
-make install; \
-cd third_party/protobuf; \
-make install; \
-cd /;\
+    # install daemon
+    mkdir snet-daemon; \
+    cd snet-daemon; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    cd ..; \
+    rm -rf snet-daemon; \
 
-# install snet daemon to call for services
-mkdir snet-daemon; \
-cd snet-daemon; \
-wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.5/snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-tar -xvf snet-daemon-v0.1.5-linux-amd64.tar.gz; \
-mv ./snet-daemon-v0.1.5-linux-amd64/snetd /usr/bin/snetd; \
-cd ..; \
-rm -rf snet-daemon; \
-
-# install cli to handle services publishing and other related operations
-cd /opt; \
-git clone https://github.com/singnet/snet-cli; \
-cd snet-cli; \
-./scripts/blockchain install; \
-pip3 install -e .; \
+    # install cli
+    cd /opt; \
+    git clone https://github.com/singnet/snet-cli; \
+    cd snet-cli; \
+    ./scripts/blockchain install; \
+    pip3 install -e .; \
 ```
 </p></details>
 
@@ -126,11 +123,14 @@ Besides building the source, this command will check the responsiveness of real 
 <details><summary>Click here to see the commands called by './setup.sh -b'</summary><p>
     
 ```
-# build source
-make clean; make
+    # build source
+    make clean; make
 
-# run tests
-./bin/deployTests
+    echo "Running unit tests..."
+    ./bin/cxxUnitTestsRunner.out
+
+    echo "Running integration tests..."
+    ./bin/integrationTests.out
 ```
 </p></details>
 
@@ -193,14 +193,14 @@ It is important to note that the DAEMON listen to outside requests and the GRPC 
 <details><summary>Click here to see the commands called by './setup.sh -r'</summary><p>
     
 ```
-# create snet daemon snetd.config.json file
-createDeamonConfig
+    # run daemon for kovan
+    snetd --config ./snetd_configs/snetd.kovan.json & 
 
-# run daemon in background
-snetd --config snetd.config.json &
-
-# run the service local server in background
-./bin/server &
+    # run daemon for the ropsten
+    snetd --config ./snetd_configs/snetd.ropsten.json & 
+    
+    # run server
+    ./bin/server.out
 ```
 </p></details>
 
@@ -243,20 +243,29 @@ This command will publish the service with the specified information in [service
 <details><summary>Click here to see the commands called by './setup.sh -p'</summary><p>
     
 ```
-# delete service before trying to publish it
-snet service delete $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
+    # change to the correct network
+    snet network $NETWORK_VAR
 
-# create metadata json for this service with its name and the wallet that will receive money
-snet service metadata-init src/service_spec $SERVICE_NAME_VAR $WALLET_VAR
+    # delete service before trying to publish it
+    snet service delete $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 
-# set the price to use this service
-snet service metadata-set-fixed-price $PRICE_VAR
+    # create metadata json for this service with its name and the wallet that will receive money
+    snet service metadata-init src/service_spec $SERVICE_NAME_VAR $WALLET_VAR
 
-# set the local port to access this service server
-snet service metadata-add-endpoints https://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
+    # set the price to use this service
+    snet service metadata-set-fixed-price $PRICE_VAR
 
-# publish the service at the specified organization
-snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
+    # set the local port to access this service server
+    snet service metadata-add-endpoints http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
+
+    # add description to this service
+    snet service metadata-add-description --json '{"description":"$SERVICE_DESCRIPTION_VAR", "url":"$REPO_URL_VAR"}'
+
+    # publish the service at the especified organization
+    snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
+
+    # add tags to the service    
+    snet service update-add-tags $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR $TAGS_VAR -y
 ```
 </p></details>
 
