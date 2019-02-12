@@ -19,9 +19,11 @@ RUN git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
     make install; \
     cd /
 
+# create working dir
+RUN mkdir /home/ubuntu
+
 # clone service repository into this dockerfile and install the DAEMON and service specific dependencies
-RUN mkdir /home/ubuntu; \
-    cd /home/ubuntu; \
+RUN cd /home/ubuntu; \
     git clone https://github.com/singnet/time-series-anomaly-discovery.git; \
     cd time-series-anomaly-discovery; \
     ./setup.sh -d

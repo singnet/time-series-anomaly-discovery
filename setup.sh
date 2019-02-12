@@ -65,6 +65,11 @@ done
 # -------------------------------------------- #
 ################################################
 
+SERVICE_DESCRIPTION_VAR=
+REPO_URL_VAR=
+NETWORK_VAR=
+TAGS_VAR=
+
 SERVICE_NAME_VAR=
 WALLET_VAR=
 PRICE_VAR=
@@ -98,6 +103,10 @@ if [ -f "$PROJECT_PATH/service_conf" ]; then
     LOAD_CONFIG_VAR=1
 
     # set basic service conf
+    SERVICE_DESCRIPTION_VAR=$SERVICE_DESCRIPTION
+    REPO_URL_VAR=$REPO_URL
+    TAGS_VAR=$TAGS
+    NETWORK_VAR=$NETWORK
     REPOSITORY_NAME_VAR=$REPOSITORY_NAME
     SERVICE_NAME_VAR=$SERVICE_NAME
     WALLET_VAR=$WALLET
@@ -209,7 +218,7 @@ jobs:
             echo \"Finished.\"
           EOF
     - run:
-        name: Perform unit tests
+        name: Build source
         command: |
           # staging and production container names
           STAGING_DOCKER_CONTAINER_NAME=\"staging_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
@@ -221,7 +230,21 @@ jobs:
             docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
               \"cd /home/ubuntu/\$REPOSITORY; \\
                make clean; \\
-               make; \\
+               make\"
+            echo \"Finished.\"
+          EOF
+    - run:
+        name: Perform unit tests
+        command: |
+          # staging and production container names
+          STAGING_DOCKER_CONTAINER_NAME=\"staging_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
+          PROD_DOCKER_CONTAINER_NAME=\"prod_\${CIRCLE_PROJECT_USERNAME}_\${REPOSITORY}\"
+
+          ssh -o \"StrictHostKeyChecking no\" \$SSH_USER@\$SSH_HOST << EOF
+            # Build source and run tests
+            echo \"Building source inside staging container and performing integration tests...\"
+            docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
+              \"cd /home/ubuntu/\$REPOSITORY; \\
                ./bin/cxxUnitTestsRunner.out\"
             echo \"Finished.\"
           EOF
@@ -237,8 +260,6 @@ jobs:
             echo \"Building source inside staging container and performing integration tests...\"
             docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
               \"cd /home/ubuntu/\$REPOSITORY; \\
-               make clean; \\
-               make; \\
                ./bin/integrationTests.out\"
             echo \"Finished.\"
           EOF
@@ -341,11 +362,11 @@ return $DOCKER_FILE
 
 run()
 {
-    # create snet daemon config file
-    createDeamonConfig
+    # run daemon for kovan
+    snetd --config ./snetd_configs/snetd.kovan.json & 
 
-    # run daemon
-    snetd --config snetd.config.json & 
+    # run daemon for the ropsten
+    snetd --config ./snetd_configs/snetd.ropsten.json & 
     
     # run server
     ./bin/server.out
@@ -479,6 +500,9 @@ fi
 ################################################
 
 if [ $PUBLISH_VAR == 1 ]; then
+    # change to the correct network
+    snet network $NETWORK_VAR
+
     # delete service before trying to publish it
     snet service delete $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 
@@ -491,8 +515,14 @@ if [ $PUBLISH_VAR == 1 ]; then
     # set the local port to access this service server
     snet service metadata-add-endpoints http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
 
+    # add description to this service
+    snet service metadata-add-description --json '{"description":"$SERVICE_DESCRIPTION_VAR", "url":"$REPO_URL_VAR"}'
+
     # publish the service at the especified organization
     snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
+
+    # add tags to the service    
+    snet service update-add-tags $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR $TAGS_VAR -y
 fi
 
 ################################################
