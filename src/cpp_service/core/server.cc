@@ -92,7 +92,7 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         if (!loading_status)
         {
             pOutput->set_output("Invalid time series URL or file...");
-            return;
+            return Status::OK;
         }
 
         printf("\n\nReceived request: \n");

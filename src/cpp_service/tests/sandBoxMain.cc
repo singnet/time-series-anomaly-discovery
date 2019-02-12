@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
 
     // load time series
     std::vector<double> time_series;
-    loadSeriesURL(argv[1], time_series, false);
+    bool load_status = false;
+    loadSeriesURL(argv[1], time_series, load_status, false);
 
     // load window size
     int sliding_window_size = atoi(argv[2]);
