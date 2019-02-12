@@ -528,7 +528,18 @@ if [ $PUBLISH_VAR == 1 ]; then
     snet service metadata-add-endpoints http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
 
     # add description to this service
-    snet service metadata-add-description --json '{"description":"$SERVICE_DESCRIPTION_VAR", "url":"$REPO_URL_VAR"}'
+    JSON="{\"description\":\"$SERVICE_DESCRIPTION_VAR\", \"url\":\"$REPO_URL_VAR\"}"
+
+    # try to delete old file to create a clean one
+    if [ -f "desc.json" ]; then        
+        rm desc.json
+    fi
+
+    # print JSON into configuration file
+    echo $JSON >> desc.json
+
+    # set metadata for the generated config
+    snet service metadata-add-description --json "$(cat desc.json)"
 
     # publish the service at the especified organization
     snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y

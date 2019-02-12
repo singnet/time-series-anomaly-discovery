@@ -21,9 +21,9 @@ using grpc::ServerWriter;
 using grpc::Status;
 
 // PROTO_TYPES
+using timeSeriesAnomalyDetection::EfficientRuleDensityBasedAnomalyDetection;
 using timeSeriesAnomalyDetection::InputParameters;
 using timeSeriesAnomalyDetection::OutputString;
-using timeSeriesAnomalyDetection::EfficientRuleDensityBasedAnomalyDetection;
 
 using namespace timeSeries;
 
@@ -35,16 +35,23 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
     {
     }
 
-    void buildArgs(const InputParameters *pInInputArgs,
+    bool buildArgs(const InputParameters *pInInputArgs,
                    std::vector<double> &rOutTimeSeries,
                    std::vector<std::string> &rOutAlphabet,
                    int &rOutSlidingWindowRange,
                    int &rOutpaaSize,
                    int &rOutDetectionThreshold,
                    bool &rOutDebugStatus)
-    {     
+    {
+        bool loading_status = true;
+
         // build up time series from arg 0
-        loadSeriesURL(pInInputArgs->timeseries().c_str(), rOutTimeSeries, false);
+        loadSeriesURL(pInInputArgs->timeseries().c_str(), rOutTimeSeries, loading_status, false);
+
+        if (!loading_status)
+        {
+            return loading_status;
+        }
 
         // build up alphabet
         int alphabet_size = atoi(pInInputArgs->alphabet().c_str());
@@ -65,6 +72,8 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
 
         // get debug status
         rOutDebugStatus = atoi(pInInputArgs->debugflag().c_str());
+
+        return loading_status;
     }
 
     // SERVICE_API
@@ -76,9 +85,15 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         int paa_size;
         bool debug_status;
         int detection_threshold;
-        
+
         // get arguments from input
-        buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, detection_threshold, debug_status);
+        bool loading_status = buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, detection_threshold, debug_status);
+
+        if (!loading_status)
+        {
+            pOutput->set_output("Invalid time series URL or file...");
+            return;
+        }
 
         printf("\n\nReceived request: \n");
         printf("Time Series: %s\n", pInInput->timeseries().c_str());
@@ -89,7 +104,7 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         printf("debug_status: %s\n\n", pInInput->debugflag().c_str());
 
         // create an anomaly discovery object
-        ErdbAnomalyDiscovery* anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
+        ErdbAnomalyDiscovery *anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
 
         // insert received time series into this anomaly detector
         for (unsigned int sample = 0; sample < time_series.size(); sample++)

@@ -3,10 +3,10 @@ REPOSITORY_NAME="time-series-anomaly-discovery"
 
 # publish info
 SERVICE_NAME="time-series-anomaly-discovery"
-SERVICE_DESCRIPTION="This service allows to detect anomalies in time series with grammar compression."
-REPO_URL="https://github.com/singnet/time-series-anomaly-discovery"
-TAGS='Anomaly Discovery Compression "Time Series"'
-NETWORK=ropsten
+SERVICE_DESCRIPTION='This service allows to detect anomalies in time series with grammar compression.'
+REPO_URL='https://github.com/singnet/time-series-anomaly-discovery'
+TAGS='Anomaly Discovery Compression Time-Series'
+NETWORK=kovan
 WALLET="0xfe98f73A11f4fBc5623B0Aa966522fe016A82487"
 PRICE=0.00000001
 

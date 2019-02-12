@@ -123,8 +123,9 @@ void timeSeries::loadSeriesCsv(const char *pInOutputFile, std::vector<double> &r
     fclose(pSeriesFile);
 }
 
-void timeSeries::loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, const bool hasHeader)
+void timeSeries::loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, bool &rOutStatus, const bool hasHeader)
 {
+    rOutStatus = true;
     std::string tmp_series_file_name = "";
     std::string error_msg = "";
     CURLcode error_code = loadUrlFile(error_msg, pInUrl, tmp_series_file_name);
@@ -132,6 +133,7 @@ void timeSeries::loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeri
     if (error_code)
     {
         // TODO:handle error
+        rOutStatus = false;
     }
     else
     {
