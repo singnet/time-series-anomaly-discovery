@@ -46,12 +46,7 @@ jobs:
 
             # running the cpp service base container
             echo "Running staging container based on the cpp basic service image..."
-            docker run -tdi --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME
-            echo "Finished."
-         
-            # clonning this service repo into the cpp base container
-            echo "Downloading the $REPOSITORY service to the staging container..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+            docker run -i --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME /bin/bash -c \
               "cd /home/ubuntu; \
                git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git"
             echo "Finished."
@@ -66,7 +61,7 @@ jobs:
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # Build source and run tests
             echo "Building source inside staging container and performing integration tests..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+            docker start -i $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
                make clean; \
                make"
@@ -82,7 +77,7 @@ jobs:
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # Build source and run tests
             echo "Building source inside staging container and performing integration tests..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+            docker start -i $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
                ./bin/cxxUnitTestsRunner.out"
             echo "Finished."
@@ -97,7 +92,7 @@ jobs:
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # Build source and run tests
             echo "Building source inside staging container and performing integration tests..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
+            docker start -i $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
                ./bin/integrationTests.out"
             echo "Finished."
