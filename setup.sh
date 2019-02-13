@@ -401,6 +401,9 @@ callService()
     echo
     echo "Running a test call to this service daemon with the specified data in the 'service_conf' file."
 
+    # change to the correct network
+    snet network $NETWORK_VAR
+    
     # open a channel with the deposited amount to call for this service
     CHANNEL_TIME_OUT=11000000
     RESPONSE="$(snet channel open-init $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR $PRICE_VAR $CHANNEL_TIME_OUT -y)"
