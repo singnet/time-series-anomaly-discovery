@@ -84,7 +84,7 @@ jobs:
             echo "Building source inside staging container and performing integration tests..."
             docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
-               ./bin/cxxUnitTestsRunner.out"
+               ./bin/release_cxxUnitTestsRunner.out"
             echo "Finished."
           EOF
     - run:
@@ -99,7 +99,7 @@ jobs:
             echo "Building source inside staging container and performing integration tests..."
             docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
-               ./bin/integrationTests.out"
+               ./bin/release_integrationTests.out"
             echo "Finished."
           EOF
     - run:
