@@ -1,4 +1,5 @@
 # basic service info
+DISPLAY_NAME="Time Series Anomaly Discovery"
 REPOSITORY_NAME="time-series-anomaly-discovery"
 
 # publish info

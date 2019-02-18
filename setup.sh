@@ -70,6 +70,7 @@ REPO_URL_VAR=
 NETWORK_VAR=
 TAGS_VAR=
 
+DISPLAY_NAME_VAR=
 SERVICE_NAME_VAR=
 WALLET_VAR=
 PRICE_VAR=
@@ -103,6 +104,7 @@ if [ -f "$PROJECT_PATH/service_conf" ]; then
     LOAD_CONFIG_VAR=1
 
     # set basic service conf
+    DISPLAY_NAME_VAR=$DISPLAY_NAME
     SERVICE_DESCRIPTION_VAR=$SERVICE_DESCRIPTION
     REPO_URL_VAR=$REPO_URL
     TAGS_VAR=$TAGS
@@ -522,7 +524,7 @@ if [ $PUBLISH_VAR == 1 ]; then
     snet service delete $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 
     # create metadata json for this service with its name and the wallet that will receive money
-    snet service metadata-init src/service_spec $SERVICE_NAME_VAR $WALLET_VAR
+    snet service metadata-init src/service_spec "$DISPLAY_NAME_VAR" $WALLET_VAR
 
     # set the price to use this service
     snet service metadata-set-fixed-price $PRICE_VAR
