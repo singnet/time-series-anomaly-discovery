@@ -24,47 +24,70 @@
  * SOFTWARE.
  */
 
-#ifndef UTILS_IMPL_H
-#define UTILS_IMPL_H
+#ifndef OBJ_H
+#define OBJ_H
 
-#include <cmath>
-#include <vector>
+#include "Range.h"
+#include "Symbol.h"
+#include "Rule.h"
 
-namespace timeSeries
+class Obj
 {
-
-/**
-  * Calculate the mean between a start proint and range from
-  * a given subsequence. */
-template <class vecType, class returnType>
-returnType mean(std::vector<vecType> &rInSubSequence, const int start, const int range)
-{
-    returnType sum = 0.0;
-    int r = start + range;
-    for (unsigned int sample = start; sample < r; sample++)
+  public:
+    /**
+     */
+    Obj()
     {
-        sum += (returnType)rInSubSequence[sample];
+        _symbol = NULL;
+        _rule = NULL;
     }
 
-    return sum / (returnType)range;
-}
-
-/**
-  * Calculate the standard deviation between a start proint 
-  * and range from a given subsequence and its mean. */
-template <class vecType, class returnType>
-returnType standardDeviation(const returnType mean, std::vector<vecType> &rInSubSequence, const int start, const int range)
-{
-    returnType distance_to_mean_sum = 0.0;
-
-    for (unsigned int sample = start; sample < start + range; sample++)
+    /**
+     */
+    ~Obj()
     {
-        distance_to_mean_sum += std::pow(mean - (returnType)rInSubSequence[sample], 2.0);
     }
 
-    return std::sqrt(distance_to_mean_sum / ((returnType)range - 1));
-}
+    /**
+     */
+    bool isSymbol()
+    {
+        if (_symbol != NULL)
+            return true;
+        return false;
+    }
 
-} // namespace timeSeries
+    /**
+     */
+    bool isRule()
+    {
+        if (_rule != NULL)
+            return true;
+        return false;
+    }
+
+    /**
+     */
+    bool operator==(Obj &B)
+    {
+        if (isSymbol() && B.isSymbol())
+        {
+            if (this->_symbol->_symbol == B._symbol->_symbol)
+                return true;
+        }
+
+        if (isRule() && B.isRule())
+        {
+            if (_rule == B._rule)
+                return true;
+        }
+
+        return false;
+    }
+
+    Range _range;    ///<
+    Symbol *_symbol; ///<
+    Rule *_rule;     ///<
+};
 
 #endif

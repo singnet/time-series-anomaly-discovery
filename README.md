@@ -127,10 +127,10 @@ Besides building the source, this command will check the responsiveness of real 
     make clean; make
 
     echo "Running unit tests..."
-    ./bin/cxxUnitTestsRunner.out
+    ./bin/release_cxxUnitTestsRunner.out
 
     echo "Running integration tests..."
-    ./bin/integrationTests.out
+    ./bin/release_integrationTests.out
 ```
 </p></details>
 
@@ -139,7 +139,7 @@ Besides building the source, this command will check the responsiveness of real 
 After building the source, run the GPRC server with following command. It will run the server in background mode. 
 
 ```
-./bin/server.out &
+./bin/release_server.out &
 ```
 
 ## Step 3 - Calling GRPC server locally
@@ -147,14 +147,19 @@ After building the source, run the GPRC server with following command. It will r
 After running the server, run the client with the command presented bellow. With the presented example input parameters, the algorithms should be able to detect simulated spikes in the input time series. A spike is represented by the number 1000 while a normal sample is represented by the number 1.
 
 ```
-./bin/client.out https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/data/ecg0606_1.csv 100 3 2 1 0
+./bin/release_client.out https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/data/ecg0606_1.csv 100 5 10 0
 ```
 
-Expected output:
+For this call the service will output the following files.
 
-```
-17 459 460 461 462 463 464 465 466 
-```
+* output_time_series.json
+   * the original time series json string.
+* output_density_curve.json
+   * the generated density curve for the specified input parameters.
+* output_normalized_density_curve.json
+   * the normalized density curve.
+* output_normalized_inverted_density_curve.json
+   * the inverted normalized density curve.
 
 The presented output represents the indexes in which anomalies were detected in the original time series beginning at index 0.
 
@@ -173,9 +178,6 @@ The presented output represents the indexes in which anomalies were detected in 
    * Type = Integer
    * Represents: Piecewise Aggregate Approximation defining the number of sub-samples that will be generated for each sliding window position.
 * arg [5]
-   * Type = Integer
-   * Represents: Density curve detection threshold.
-* arg [6]
    * Type = Integer
    * Represents: Debug printing flag, where 0 is false and 1 is true.
 
@@ -200,7 +202,7 @@ It is important to note that the DAEMON listen to outside requests and the GRPC 
     snetd --config ./snetd_configs/snetd.ropsten.json & 
     
     # run server
-    ./bin/server.out
+    ./bin/release_server.out
 ```
 </p></details>
 
@@ -259,7 +261,18 @@ This command will publish the service with the specified information in [service
     snet service metadata-add-endpoints http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
 
     # add description to this service
-    snet service metadata-add-description --json '{"description":"$SERVICE_DESCRIPTION_VAR", "url":"$REPO_URL_VAR"}'
+    JSON="{\"description\":\"$SERVICE_DESCRIPTION_VAR\", \"url\":\"$REPO_URL_VAR\"}"
+
+    # try to delete old file to create a clean one
+    if [ -f "desc.json" ]; then        
+        rm desc.json
+    fi
+
+    # print JSON into configuration file
+    echo $JSON >> desc.json
+
+    # set metadata for the generated config
+    snet service metadata-add-description --json "$(cat desc.json)"
 
     # publish the service at the especified organization
     snet service publish $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y

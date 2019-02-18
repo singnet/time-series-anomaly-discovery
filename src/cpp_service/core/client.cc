@@ -30,14 +30,12 @@ class ServiceClient
 
     void run(int argc, char **argv)
     {
-        if (argc < 7){
+        if (argc < 5){
             printf("\n\nTime series anomaly discovery service\n\n");
             printf("input:\n\t<time series url string> values: url string containing a time series csv file");
             printf("\n\t<sliding window size> values: number greater than 0 ex: \"10\"");
             printf("\n\t<alphabet> size: size of the alphabet ex: \"1\" or \"2\", etc");
             printf("\n\t<paa size> values: number greater than 0 ex: \"2\"");
-            printf("\n\t<detection threshold> values: number greater than 0 ex: \"2\"");
-            printf("\n\t<numerosity reduction> values: number greater than 0 ex: \"2\"");
             printf("\n\t<debug flag> values: \"1\" or \"0\"\n\n");
             exit(-1);
         }
@@ -50,15 +48,31 @@ class ServiceClient
         input.set_slidingwindowsize(argv[2]);
         input.set_alphabet(argv[3]);
         input.set_paasize(argv[4]);
-        input.set_detectionthreshold(argv[5]);
-        input.set_debugflag(argv[6]);
+        input.set_debugflag(argv[5]);
 
         ClientContext context;
         Status status = stub_->detectAnomalies(&context, input, &output);
         if (status.ok())
         {
-            // print received output if any
-            printf("%s", output.output().c_str());
+            // save received responses into file
+            FILE *out_curve = fopen("output_time_series.json", "w");
+            FILE *out_densities = fopen("output_density_curve.json", "w");
+            FILE *out_norm_densities = fopen("output_normalized_density_curve.json", "w");
+            FILE *out_norm_inv_densities = fopen("output_normalized_inverted_density_curve.json", "w");
+
+            // save received responses into file
+            fprintf(out_curve, "%s", output.timeseries().c_str());
+            fprintf(out_densities, "%s", output.density().c_str());
+            fprintf(out_norm_densities, "%s", output.normalized().c_str());
+            fprintf(out_norm_inv_densities, "%s", output.inverted().c_str());
+
+            fclose(out_curve);
+            fclose(out_densities);
+            fclose(out_norm_densities);
+            fclose(out_norm_inv_densities);
+
+            // operations performed well for this call
+            printf("OK");
         }
         else
         {

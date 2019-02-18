@@ -58,62 +58,43 @@ class DensityCurve
     ~DensityCurve();
 
     /**
-      * This method inserts a symbol at the last position of the density curve. */
-    void insertSymbol(const char *pInWord);
-
-    /**
-      * This method counts how many times each symbol from the current density curve
-      * appears in the sequitur's instance generated grammar so far. */
-    void updateDensityCurve(Sequitur &rInSequitur, const int thresholdValue = -1);
-
-    /**
-      * This method returns the global mininum intervals for the density curve updated so far. */
-    void getGlobalMinDensities(std::vector<int> &rOutVec);
-
-    /**
-      * This method returns the global maximum intervals for the density curve updated so far. */
-    void getGlobalMaxDensities(std::vector<int> &rOutVec);
-
-    /**
-      * This method returns the local mininum intervals for the density curve updated so far. */
-    void getLocalMinDensities(std::vector<int> &rOutVec);
-
-    /**
-      * This method returns the local max intervals for the density curve updated so far. */
-    void getLocalMaxDensities(std::vector<int> &rOutVec);
-
-    /**
-      * This method returns the detected anomalies, where the detection method is based on a threshold value. */
-    void getThresholdDetectedAnomalies(std::vector<int> &rOutVec);
-
-    /**
-      * This method prints the current density curve so far. */
-    void printDensityCurve();
-
-    /**
       * This method saves the density curve generated so far. */
     void saveCsv(const char *pInOutputFileName);
 
+    /**
+      */
+    void getJson(
+        std::string &rOutTimeSeries,
+        std::string &rOutDensityString,
+        std::string &rOutNormalizedDensityString,
+        std::string &rOutInvertedDensityString);
+
+    /**
+      */
+    void getDensityCurve(std::vector<int> &rOutDensities);
+
+    /**
+      */
+    void getNormalized(std::vector<int> &rOutDensities);
+
+    /**
+      */
+    void getNormalizedInverted(std::vector<int> &rOutDensities);
+
+    /**
+      */
+    void setCurve(std::vector<double> &rInTimeSeries, std::vector<int> &rInDensityCurve, const int windowSize);
+
   private:
     /**
-      * This method computes the maximum and minimum intervals.
-      * It uses the delta between density curve samples to check if a change on information
-      * happened. If so, then it starts to accumulate values until finding another change.
-      * Intervals between changes are stored as maximum or minimum values. */
-    void findLocalMinMaxIntervals();
+      */
+    void generateNormalizedAndInvert();
 
-    std::vector<std::string> _seriesWords; ///< Stores the time series words
-    std::vector<int> _density; ///< Stores the densities for each word
-
-    std::vector<int> _localMinPoints; ///< local minimum intervals
-    std::vector<int> _localMaxPoints; ///< local maximum intervals
-    std::vector<int> _globalMaxPoints; ///< global maximum intervals
-    std::vector<int> _globalMinPoints; ///< global minimum intervals
-    std::vector<int> _thresholdDetectedAnomalies; ///< detected anomalies by threshold
-    double _mean; ///< curve mean
-    double _standardDeviation; ///< curve standard deviation
-    double _minDensity; ///< curve minimum density
-    double _maxDensity; ///< curve maximum density
+    int _windowSize;                 ///<
+    std::vector<int> _density;       ///< Stores the densities for each word
+    std::vector<double> _timeSeries; ///<
+    std::vector<double> _normalized; ///<
+    std::vector<double> _inverted;   ///<
 };
 
 } // namespace timeSeries

@@ -381,7 +381,7 @@ run()
     snetd --config ./snetd_configs/snetd.ropsten.json & 
     
     # run server
-    ./bin/server.out
+    ./bin/release_server.out
 }
 
 compileAndTest()
@@ -390,10 +390,10 @@ compileAndTest()
     make clean; make
 
     echo "Running unit tests..."
-    ./bin/cxxUnitTestsRunner.out
+    ./bin/release_cxxUnitTestsRunner.out
 
     echo "Running integration tests..."
-    ./bin/integrationTests.out
+    ./bin/release_integrationTests.out
 }
 
 callService()

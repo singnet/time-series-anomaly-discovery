@@ -40,12 +40,12 @@ static void callSequitur(
         inputString += line;
 
         // insert word into the sequitur algorithm
-        sequitur.insertSymbol(line.c_str());
+        sequitur.insertSymbol(line.c_str(), j, 10, false);
     }
 
     //  test through the cxxtest api
     std::string generated_string = "";
-    sequitur.expandGrammar("~0", generated_string);
+    sequitur.expandGrammar(generated_string);
 
     // test results
     TS_ASSERT(generated_string == inputString);
@@ -119,9 +119,9 @@ void SequiturCxxUnitTest::test_broaderVariationAllParameters()
 {
     TS_TRACE("Starting broaderVariationAllParameters test");
 
-    unsigned int N = 100;
+    unsigned int N = 10;
     unsigned int minInputSize = 10;
-    unsigned int maxInputSize = 1000;
+    unsigned int maxInputSize = 100;
     unsigned int minAlphabetSize = 2;
     unsigned int maxAlphabetSize = 10;
     char lineBuffer[2];
@@ -134,7 +134,7 @@ void SequiturCxxUnitTest::test_broaderVariationAllParameters()
         {
             for (unsigned int inputSize = minInputSize; inputSize <= maxInputSize; inputSize += 10)
             {
-                //callSequitur(alphabetSize, inputSize);
+                callSequitur(alphabetSize, inputSize);
             }
         }
     }
@@ -147,7 +147,7 @@ void SequiturCxxUnitTest::test_smallAlphabetHugeInput()
     TS_TRACE("Starting smallAlphabetHugeInput test");
 
     unsigned int N = 1;
-    unsigned int inputSize = 1000000;
+    unsigned int inputSize = 10000;
     unsigned int minAlphabetSize = 5;
     unsigned int maxAlphabetSize = 5;
     char lineBuffer[2];
@@ -158,7 +158,7 @@ void SequiturCxxUnitTest::test_smallAlphabetHugeInput()
     {
         for (unsigned int alphabetSize = minAlphabetSize; alphabetSize <= maxAlphabetSize; alphabetSize++)
         {
-            //callSequitur(alphabetSize, inputSize);
+            callSequitur(alphabetSize, inputSize);
         }
     }
 
