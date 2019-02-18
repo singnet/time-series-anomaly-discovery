@@ -69,7 +69,6 @@ SOURCE += $(SOURCE_FOLDER)/anomaly_discovery/*.cc
 SOURCE += $(SOURCE_FOLDER)/tests/*.cc
 SOURCE += $(SOURCE_FOLDER)/core/*.cc
 SOURCE += $(SOURCE_FOLDER)/tests/*.cc
-SOURCE += $(SOURCE_FOLDER)/session_manager/*.cc
 SOURCE += $(SOURCE_FOLDER)/utils/*.cc
 
 # grpc generated objects based on the proto file
@@ -82,16 +81,32 @@ SERVER_DEPS += $(OBJ_FOLDER)/PiecewiseAggregateApproximation.o
 SERVER_DEPS += $(OBJ_FOLDER)/Sequitur.o
 SERVER_DEPS += $(OBJ_FOLDER)/DensityCurve.o
 SERVER_DEPS += $(OBJ_FOLDER)/timeSeriesUtils.o
-SERVER_DEPS += $(OBJ_FOLDER)/SessionManager.o
 SERVER_DEPS += $(OBJ_FOLDER)/utils.o
 
-all: cxx_unit_tests_gen grpcProto genDebugObj debug cxx_main genObj server client test_bin mv_files
+GLOBAL_TARGET_DEPS += cxx_unit_tests_gen
+GLOBAL_TARGET_DEPS += grpcProto
+
+DEBUG_TARGET_DEPS += genDebugObj
+DEBUG_TARGET_DEPS += debugServer
+DEBUG_TARGET_DEPS += debugClient
+DEBUG_TARGET_DEPS += debugCxx_main
+DEBUG_TARGET_DEPS += debugSandBox
+DEBUG_TARGET_DEPS += debugIntegrationTests
+
+RELEASE_TARGET_DEPS += genObj
+RELEASE_TARGET_DEPS += server
+RELEASE_TARGET_DEPS += client
+RELEASE_TARGET_DEPS += cxx_main
+RELEASE_TARGET_DEPS += releaseSandBox
+RELEASE_TARGET_DEPS += integrationTests
+
+all: $(GLOBAL_TARGET_DEPS) $(DEBUG_TARGET_DEPS) $(RELEASE_TARGET_DEPS) mv_files
 
 mv_files:
 	@mv ./runner.cc $(SOURCE_FOLDER)/tests/unit_tests/
 
 server:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/server.$(EXT)\
+	$(CXX) $^ $(LDFLAGS) -o ./bin/release_server.$(EXT)\
 		$(OBJ_FOLDER)/server.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
@@ -99,14 +114,14 @@ server:
 		$(SERVER_DEPS) -lcurl
 
 client:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/client.$(EXT)\
+	$(CXX) $^ $(LDFLAGS) -o ./bin/release_client.$(EXT)\
 		$(OBJ_FOLDER)/client.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
 		/usr/local/lib/libgrpc++.so -lcurl
 
 cxx_main:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/cxxUnitTestsRunner.$(EXT)\
+	$(CXX) $^ $(LDFLAGS) -o ./bin/release_cxxUnitTestsRunner.$(EXT)\
 		$(OBJ_FOLDER)/runner.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
 		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
@@ -114,11 +129,41 @@ cxx_main:
 		/usr/lib/x86_64-linux-gnu/libcurl.so\
 		$(SERVER_DEPS) -lcurl
 
-debug:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/sandBoxMain.$(EXT) $(OBJ_FOLDER)/sandBoxMain.o $(SERVER_DEPS) -lcurl
+releaseSandBox:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/release_sandBoxMainRelease.$(EXT) $(OBJ_FOLDER)/sandBoxMain.o $(SERVER_DEPS) -lcurl
 
-test_bin:
-	$(CXX) $^ $(LDFLAGS) -o ./bin/integrationTests.$(EXT) $(OBJ_FOLDER)/integrationTestsMain.o -lcurl
+integrationTests:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/release_integrationTests.$(EXT) $(OBJ_FOLDER)/integrationTestsMain.o -lcurl
+
+debugServer:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/debug_server.$(EXT)\
+		$(OBJ_FOLDER)/server.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
+		/usr/local/lib/libgrpc++.so\
+		$(SERVER_DEPS) -lcurl
+
+debugClient:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/debug_client.$(EXT)\
+		$(OBJ_FOLDER)/client.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
+		/usr/local/lib/libgrpc++.so -lcurl
+
+debugCxx_main:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/debug_cxxUnitTestsRunner.$(EXT)\
+		$(OBJ_FOLDER)/runner.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.pb.o\
+		$(OBJ_FOLDER)/timeSeriesAnomalyDetection.grpc.pb.o\
+		/usr/local/lib/libgrpc++.so\
+		/usr/lib/x86_64-linux-gnu/libcurl.so\
+		$(SERVER_DEPS) -lcurl
+
+debugIntegrationTests:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/debug_integrationTests.$(EXT) $(OBJ_FOLDER)/integrationTestsMain.o -lcurl
+
+debugSandBox:
+	$(CXX) $^ $(LDFLAGS) -o ./bin/debug_sandBoxMainDebug.$(EXT) $(OBJ_FOLDER)/sandBoxMain.o $(SERVER_DEPS) -lcurl
 
 cxx_unit_tests_gen:
 	@cxxtestgen --error-printer -o runner.cc $(SOURCE_FOLDER)/tests/unit_tests/*.h
@@ -141,7 +186,7 @@ clean:
 	@rm -rf *.o\
 		./*.cc\
 		./*.h\
-		$(SOURCE_FOLDER)/tests/runner.cc\
+		$(SOURCE_FOLDER)/tests/unit_tests/runner.cc\
 		$(SOURCE_FOLDER)/core/*.pb.cc\
 		$(SOURCE_FOLDER)/core/*.pb.h\
 		$(BIN_FOLDER)/*.$(EXT)\

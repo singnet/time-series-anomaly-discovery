@@ -66,9 +66,9 @@ class PiecewiseAggregateApproximation
     int getApproximatedPointLength();
 
   private:
-    std::vector<double> *_pTimeSeries; ///< original time series points
+    std::vector<double> *_pTimeSeries;             ///< original time series points
     std::vector<double> *_pApproximatedTimeSeries; ///< approximated time series sample
-    int _approximatedPointLength; ///< approximated time series length
+    int _approximatedPointLength;                  ///< approximated time series length
 };
 
 } // namespace timeSeries

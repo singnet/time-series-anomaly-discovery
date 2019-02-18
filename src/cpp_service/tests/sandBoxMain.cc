@@ -13,10 +13,22 @@ int main(int argc, char *argv[])
     // arg 3 - alphabet size
     // arg 4 - paa size
 
+    printf("Series URL: %s\n", argv[1]);
+    printf("Sliding Window: %s\n", argv[2]);
+    printf("Alphabet Size: %s\n", argv[3]);
+    printf("Paa Size: %s\n", argv[4]);
+    printf("Detection Threshold: %s\n", argv[5]);
+
     // load time series
     std::vector<double> time_series;
     bool load_status = false;
     loadSeriesURL(argv[1], time_series, load_status, false);
+
+    if (!load_status)
+    {
+        printf("Cannot load this time series...\n");
+        return 1;
+    }
 
     // load window size
     int sliding_window_size = atoi(argv[2]);
@@ -29,9 +41,6 @@ int main(int argc, char *argv[])
 
     // load detection threshold
     int detection_threshold = atoi(argv[5]);
-
-    // numerosity reduction arg
-    int numerosity_reduction = atoi(argv[6]);
 
     // generate alphabet
     std::vector<std::string> alphabet;
@@ -49,28 +58,8 @@ int main(int argc, char *argv[])
         anomaly_discovery.insertSample(time_series[sample]);
     }
 
-    // for all conditions of sequitur to be applied, generate the density curve statistics, and get detected anomalies
-    std::vector<int> detected_anomalies_index;
-    std::string anomaly_indexes_string;
-    anomaly_discovery.getAnomalies(detected_anomalies_index, &anomaly_indexes_string, detection_threshold, true);
-
-    for (unsigned int anomaly = 0; anomaly < detected_anomalies_index.size(); anomaly++)
-    {
-        printf("%d ", detected_anomalies_index[anomaly]);
-    }
-    printf("\n");
-
-    DensityCurve curve;
-    anomaly_discovery.getDensityCurve(curve);
-
-    std::string correct_answer = "17 459 460 461 462 463 464 465 466 ";
-
-    if(anomaly_indexes_string != correct_answer)
-    {
-        printf("ERROR!");
-    }
-
-    curve.saveCsv("DensityCurve");
+    DensityCurve *curve = anomaly_discovery.getDensityCurve();
+    curve->saveCsv("DensityCurve.csv");
 
     return 0;
 }

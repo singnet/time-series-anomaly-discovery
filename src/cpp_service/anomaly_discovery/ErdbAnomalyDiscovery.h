@@ -53,50 +53,32 @@ namespace timeSeries
 
 class ErdbAnomalyDiscovery
 {
-  public:
-    /** 
+public:
+  /** 
       * This constructor receives the parameters used to calculate the SAX words 
       * as inputs to the sequitur and density curve generator algorithms. */
-    ErdbAnomalyDiscovery(std::vector<std::string> &rInSaxAlphabet, const int slidingWindowSize, const int paaSize);
+  ErdbAnomalyDiscovery(std::vector<std::string> &rInSaxAlphabet, const int slidingWindowSize, const int paaSize);
 
-    /**
+  /**
       * Destructor used to delete this object heap variables. */
-    ~ErdbAnomalyDiscovery();
+  ~ErdbAnomalyDiscovery();
 
-    /**
+  /**
       * This method allows to insert a new sample in the time 
       * series being build for this detection object. */
-    void insertSample(const double sample);
+  void insertSample(const double sample);
 
-    /**
-      * This method allows to insert a full time series 
-      * instead of only one sample. */
-    void insertTimeSeries(std::vector<double> &rInTimeSeries);
+  /**
+      * This method calculates the density of the timeseries so far. */
+  DensityCurve *getDensityCurve();
 
-    /**
-      * This method forces the Sequitur grammar generator to enforce the rule utilities
-      * and will update the density curve based on the generated grammar.
-      * It will then compute the density curve max and min intervals to output as anomalies. 
-      * Anomalies are returned in two forms, a vector with the detected anomalies samples and
-      * a string containing the detected samples separated by spaces. */
-    void getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString = nullptr, int threshold = -1, bool debug = false);
+private:
+  std::vector<std::string> _saxAlphabet; ///< used alphabet
+  std::vector<double> _timeSeries;       ///< the original time series
+  Sequitur _sequitur; ///< sequitur algorithm instance
 
-    /**
-      * This method print the vector of detected anomalies. */
-    void printAnomalies(std::vector<int> &rInAnomaliesIndex);
-
-    /**
-      * This method returns this object density curve. */
-    void getDensityCurve(DensityCurve &rOutDensityCurve);
-
-  private:
-    std::vector<std::string> _saxAlphabet; ///< used alphabet
-    std::vector<double> _timeSeries; ///< the original time series
-    Sequitur _sequitur; ///< sequitur algorithm instance
-    DensityCurve _densityCurve; ///< density curve generator algorithm instance
-
-    int _slidingWindowSize; ///< used to define the sliding window size for each generated sax word
-    int _paaSize; ///< the size of the approximated subsequence for each sliding window
+  int _slidingWindowSize; ///< used to define the sliding window size for each generated sax word
+  int _paaSize;           ///< the size of the approximated subsequence for each sliding window
 };
 
 } // namespace timeSeries

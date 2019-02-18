@@ -18,7 +18,7 @@ PiecewiseAggregateApproximation::PiecewiseAggregateApproximation(std::vector<dou
     // approximated points with mean
     for (unsigned int sample = 0; sample < _pTimeSeries->size(); sample += _approximatedPointLength)
     {
-        double samples_mean = mean<double, double>(*_pTimeSeries, sample, sample + _approximatedPointLength);
+        double samples_mean = mean<double, double>(*_pTimeSeries, sample, _approximatedPointLength);
         _pApproximatedTimeSeries->push_back(samples_mean);
     }
 }

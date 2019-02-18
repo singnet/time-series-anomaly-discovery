@@ -29,7 +29,6 @@ using namespace timeSeries;
 
 class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Service
 {
-
   public:
     explicit ServiceImpl()
     {
@@ -40,7 +39,6 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
                    std::vector<std::string> &rOutAlphabet,
                    int &rOutSlidingWindowRange,
                    int &rOutpaaSize,
-                   int &rOutDetectionThreshold,
                    bool &rOutDebugStatus)
     {
         bool loading_status = true;
@@ -67,9 +65,6 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         // get paa size
         rOutpaaSize = atoi(pInInputArgs->paasize().c_str());
 
-        // get detection threshold
-        rOutDetectionThreshold = atoi(pInInputArgs->detectionthreshold().c_str());
-
         // get debug status
         rOutDebugStatus = atoi(pInInputArgs->debugflag().c_str());
 
@@ -84,14 +79,16 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         int sliding_window_range;
         int paa_size;
         bool debug_status;
-        int detection_threshold;
 
         // get arguments from input
-        bool loading_status = buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, detection_threshold, debug_status);
+        bool loading_status = buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, debug_status);
 
         if (!loading_status)
         {
-            pOutput->set_output("Invalid time series URL or file...");
+            pOutput->set_timeseries("");
+            pOutput->set_density("");
+            pOutput->set_normalized("");
+            pOutput->set_inverted("");
             return Status::OK;
         }
 
@@ -100,7 +97,6 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         printf("sliding_window_range: %s\n", pInInput->slidingwindowsize().c_str());
         printf("alphabet_size: %s\n", pInInput->alphabet().c_str());
         printf("paa_size: %s\n", pInInput->paasize().c_str());
-        printf("detection_threshold: %s\n", pInInput->detectionthreshold().c_str());
         printf("debug_status: %s\n\n", pInInput->debugflag().c_str());
 
         // create an anomaly discovery object
@@ -112,19 +108,26 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
             anomaly_discovery->insertSample(time_series[sample]);
         }
 
-        // for all conditions of sequitur to be applied, generate the density curve statistics, and get detected anomalies
-        std::vector<int> detected_anomalies_index;
+        // tell the anomaly discovery method to generate the density curve
+        DensityCurve *curve = anomaly_discovery->getDensityCurve();
 
-        // convert anomalies into and output string
-        std::string output_string = "";
-        anomaly_discovery->getAnomalies(detected_anomalies_index, &output_string, detection_threshold, debug_status);
-
-        printf("\n\nLOG DETECTED ANOMALIES IN SERVER\n\n%s\n\n", output_string.c_str());
+        // get google chart readable json strings for the original time series, density curve, normalized density curve, and inverted normalized density curve
+        std::string time_series_json_string = "";
+        std::string density_curve_json_string = "";
+        std::string normalized_density_curve_json_string = "";
+        std::string normalized_inverted_density_curve_json_string = "";
+        curve->getJson(time_series_json_string, density_curve_json_string, normalized_density_curve_json_string, normalized_inverted_density_curve_json_string);
 
         // set output for this service
-        pOutput->set_output(output_string.c_str());
+        pOutput->set_timeseries(time_series_json_string.c_str());
+        pOutput->set_density(density_curve_json_string.c_str());
+        pOutput->set_normalized(normalized_density_curve_json_string.c_str());
+        pOutput->set_inverted(normalized_inverted_density_curve_json_string.c_str());
 
-        delete anomaly_discovery;
+        // free curve
+        delete curve;
+
+        // delete anomaly_discovery;
         return Status::OK;
     }
 };

@@ -24,47 +24,32 @@
  * SOFTWARE.
  */
 
-#ifndef UTILS_IMPL_H
-#define UTILS_IMPL_H
+#ifndef RULE_H
+#define RULE_H
 
-#include <cmath>
 #include <vector>
 
-namespace timeSeries
+#include "Range.h"
+
+class Obj;
+
+class Rule
 {
+  public:
+    /**
+     */
+    Rule() {}
 
-/**
-  * Calculate the mean between a start proint and range from
-  * a given subsequence. */
-template <class vecType, class returnType>
-returnType mean(std::vector<vecType> &rInSubSequence, const int start, const int range)
-{
-    returnType sum = 0.0;
-    int r = start + range;
-    for (unsigned int sample = start; sample < r; sample++)
-    {
-        sum += (returnType)rInSubSequence[sample];
-    }
+    /**
+    */
+    ~Rule() {}
 
-    return sum / (returnType)range;
-}
-
-/**
-  * Calculate the standard deviation between a start proint 
-  * and range from a given subsequence and its mean. */
-template <class vecType, class returnType>
-returnType standardDeviation(const returnType mean, std::vector<vecType> &rInSubSequence, const int start, const int range)
-{
-    returnType distance_to_mean_sum = 0.0;
-
-    for (unsigned int sample = start; sample < start + range; sample++)
-    {
-        distance_to_mean_sum += std::pow(mean - (returnType)rInSubSequence[sample], 2.0);
-    }
-
-    return std::sqrt(distance_to_mean_sum / ((returnType)range - 1));
-}
-
-} // namespace timeSeries
+    int _id;                          ///<
+    int _usageCount;                  ///<
+    int _length;                      ///<
+    int _depth;                       ///<
+    std::vector<Range> _ruleCoverage; ///<
+    std::vector<Obj *> _symbols;      ///<
+};
 
 #endif

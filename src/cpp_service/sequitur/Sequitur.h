@@ -37,9 +37,20 @@
 #ifndef SEQUITUR_H
 #define SEQUITUR_H
 
-#include <map>
-#include <string>
+#include <iostream>
+#include <stdio.h>
 #include <vector>
+#include <string>
+#include <set>
+#include <map>
+#include <list>
+
+#include "Rule.h"
+#include "Obj.h"
+#include "Symbol.h"
+#include "Range.h"
+
+using namespace std;
 
 namespace timeSeries
 {
@@ -47,96 +58,88 @@ namespace timeSeries
 class Sequitur
 {
   public:
-    /// Sequitur constructor
     Sequitur();
-
-    /// Sequitur destructor
     ~Sequitur();
 
-    /** This method allows to insert symbols into the grammar being generated.
-      * After inserting a symbol, the method will check if the last digram repeats.
-      * If it does, then it will transform it into a grammar rule 
-      * and start the process over again. It will do it until no more digrams
-      * are available to be processed. */
-    void insertSymbol(const char *pInSymbol);
+    /**
+     */
+    void insertSymbol(const char *pInSymbol, const int sample, const int windowSize, const bool numerosityReduction);
 
     /**
-      * This method sets the value of a debug flag.
-      * It is used to check if debug messages will be printed during the
-      * execution of this class methods */
-    void setDebug(bool val);
-
-    /** 
-      * This method prints the grammar generated so far. */
+     */
     void printGrammar();
 
     /**
-      * This method counts how many times a symbol is used across the
-      * grammar generated so far. */
-    int countSymbolInRules(const char *pInSymbol);
+     */
+    void printRulesUsageCount();
 
     /**
-      * This method enforces the rule utility in the grammar generated so far,
-      * where a rule needs to be used more than one time to be considered 
-      * useful. */
-    bool enforceRulesUtility();
+     */
+    void expandGrammar(std::string &rOutString);
 
     /**
-      * This method expand each grammar rule and generate a full output string. */
-    void expandGrammar(std::string rule, std::string &rOutString);
+     */
+    void densityCurve(vector<int> &rOutDensity);
 
   private:
     /**
-      * This method expand each grammar rule and generate a full output string. */
-    void getExpandedRuleVector(std::string rule, std::vector<std::string> &rOutSymbolVector);
+     */
+    void insertIntoGrammar(Rule *rule);
 
     /**
-      * This method returns a rule and all its symbols.
-      * The returned rule is from the grammar generated so far. */
-    void getRule(int ruleCode, std::vector<std::string> &rOutRule);
+     */
+    void eraseRule(Rule *rule);
 
     /**
-      * This method verify it a rule exists, if it does then it will output 
-      * it's key. */
-    void verifyRuleExistance(std::vector<std::string> &rInDigram, std::string &rOutRuleKey);
+     */
+    void getLastDigram(Obj *&rOutLLast, Obj *&rOutLast);
 
     /**
-      * This method check if a digram repeats over the rules of the grammar generated so far.
-      * It returns a list containing all the digram ocurrences. */
-    void checkDigram(std::vector<std::string> &rInRule,
-                     std::vector<std::string> &rInDigram,
-                     std::vector<std::vector<std::string>::iterator> &rOutIndexDigramOcurrences);
+     */
+    int getFirstDigramRepetition();
 
     /**
-      * This method returns the last generated digram */          
-    void getLastDigram(std::vector<std::string> &rInRule, std::vector<std::string> &rOutDigram);
+     */
+    Rule *checkForDigram();
 
     /**
-      * This method returns an ID generated for a new rule.
-      * It increments for each generated rule. */
+     */
+    void getDigramString(Obj *&rOutLLast, Obj *&rOutLast, string &rOutString);
+
+    /**
+     */
+    bool generateRule();
+
+    /**
+     */
+    void expandRuleCoverage(Rule *rule, set<int> &coverage);
+
+    /**
+     */
+    void printRulesCoverage();
+
+    /**
+     */
+    bool ruleCoverage(int sampleNumber, Rule *rule);
+
+    /**
+     */
+    void expandGrammar(std::string &rOutString, Rule *pInRule);
+
+    /**
+     */
     int genId();
 
     /**
-      * This method counts the number of times a determined rule is
-      * used over the grammar generated so far. */
-    int ruleUsageCount(std::string &rInRuleSymbol,
-                       std::vector<std::vector<std::string>::iterator> &rOutRuleOcurrences,
-                       std::vector<std::string> &rOutRules);
+     */
+    int _genId;
 
-    /**
-      * This method is used to check if a symbol from the grammar
-      * generated so far is a rule or a symbol.
-      * It is primarily used to distinguish symbols from rules. */
-    bool isRule(std::string &rInSymbol);
-
-    /**
-      * This method generate new rules for each digram repetition found. */
-    bool generateRules();
-
-    int _idGen; ///< last rule ID
-    bool _debug; ///< debug flag used to check if debug messages will be printed
-    std::string _lastInsertedSymbol; ///< last symbol inserted into the grammar
-    std::map<std::string, std::vector<std::string>> _rules; ///< the rules map for the grammar generated so far
+    int _baseRuleAddress;                  ///<
+    Rule *_rBaseRule;                      ///<
+    bool _flush;                           ///<
+    Symbol *_previousSymbol;               ///<
+    map<int, Rule *> _grammar;             ///<
+    map<string, Rule *> _digramInRulesMap; ///<
 };
 
 } // namespace timeSeries

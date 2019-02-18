@@ -24,34 +24,25 @@
  * SOFTWARE.
  */
 
-#ifndef SESSION_MANAGER_H
-#define SESSION_MANAGER_H
+#ifndef RANGE_H
+#define RANGE_H
 
-#include <map>
+#include <set>
 
-#include "anomaly_discovery/ErdbAnomalyDiscovery.h"
-
-namespace timeSeries
-{
-
-class SessionManager
+class Range
 {
   public:
-    SessionManager();
-    ~SessionManager();
+    /**
+     */
+    Range() {}
+    
+    /**
+     */
+    ~Range() {}
 
-    int startSession(std::vector<std::string> &rInAlphabet, const int slidingWindow, const int paaSize);
-    void insertSample(const int sessionId, const double sample);
-    void endSession(const int sessionId);
-    void getAnomalies(const int sessionId, std::string &rOutOutputString, std::vector<int> &rOutDetectedAnomalies);
-
-  private:
-    int genId();
-
-    int _idGen;
-    std::map<int, ErdbAnomalyDiscovery*> _sessions;
+    std::set<int> _ruleBelonging; ///<
+    int _start;                   ///<
+    int _end;                     ///<
 };
-
-} // namespace timeSeries
 
 #endif

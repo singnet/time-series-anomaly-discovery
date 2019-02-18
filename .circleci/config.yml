@@ -46,7 +46,7 @@ jobs:
 
             # running the cpp service base container
             echo "Running staging container based on the cpp basic service image..."
-            docker run -tdi --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME
+            docker run -di --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME
             echo "Finished."
          
             # clonning this service repo into the cpp base container
@@ -84,7 +84,7 @@ jobs:
             echo "Building source inside staging container and performing integration tests..."
             docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
-               ./bin/cxxUnitTestsRunner.out"
+               ./bin/release_cxxUnitTestsRunner.out"
             echo "Finished."
           EOF
     - run:
@@ -99,7 +99,7 @@ jobs:
             echo "Building source inside staging container and performing integration tests..."
             docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
               "cd /home/ubuntu/$REPOSITORY; \
-               ./bin/integrationTests.out"
+               ./bin/release_integrationTests.out"
             echo "Finished."
           EOF
     - run:

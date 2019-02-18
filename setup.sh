@@ -70,6 +70,7 @@ REPO_URL_VAR=
 NETWORK_VAR=
 TAGS_VAR=
 
+DISPLAY_NAME_VAR=
 SERVICE_NAME_VAR=
 WALLET_VAR=
 PRICE_VAR=
@@ -103,6 +104,7 @@ if [ -f "$PROJECT_PATH/service_conf" ]; then
     LOAD_CONFIG_VAR=1
 
     # set basic service conf
+    DISPLAY_NAME_VAR=$DISPLAY_NAME
     SERVICE_DESCRIPTION_VAR=$SERVICE_DESCRIPTION
     REPO_URL_VAR=$REPO_URL
     TAGS_VAR=$TAGS
@@ -258,7 +260,7 @@ jobs:
             echo \"Building source inside staging container and performing integration tests...\"
             docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
               \"cd /home/ubuntu/\$REPOSITORY; \\
-               ./bin/cxxUnitTestsRunner.out\"
+               ./bin/release_cxxUnitTestsRunner.out\"
             echo \"Finished.\"
           EOF
     - run:
@@ -273,7 +275,7 @@ jobs:
             echo \"Building source inside staging container and performing integration tests...\"
             docker exec \$STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \\
               \"cd /home/ubuntu/\$REPOSITORY; \\
-               ./bin/integrationTests.out\"
+               ./bin/release_integrationTests.out\"
             echo \"Finished.\"
           EOF
     - run:
@@ -381,7 +383,7 @@ run()
     snetd --config ./snetd_configs/snetd.ropsten.json & 
     
     # run server
-    ./bin/server.out
+    ./bin/release_server.out
 }
 
 compileAndTest()
@@ -390,10 +392,10 @@ compileAndTest()
     make clean; make
 
     echo "Running unit tests..."
-    ./bin/cxxUnitTestsRunner.out
+    ./bin/release_cxxUnitTestsRunner.out
 
     echo "Running integration tests..."
-    ./bin/integrationTests.out
+    ./bin/release_integrationTests.out
 }
 
 callService()
@@ -401,6 +403,9 @@ callService()
     echo
     echo "Running a test call to this service daemon with the specified data in the 'service_conf' file."
 
+    # change to the correct network
+    snet network $NETWORK_VAR
+    
     # open a channel with the deposited amount to call for this service
     CHANNEL_TIME_OUT=11000000
     RESPONSE="$(snet channel open-init $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR $PRICE_VAR $CHANNEL_TIME_OUT -y)"
@@ -519,7 +524,7 @@ if [ $PUBLISH_VAR == 1 ]; then
     snet service delete $ORGANIZATION_TO_PUBLISH_VAR $SERVICE_NAME_VAR -y
 
     # create metadata json for this service with its name and the wallet that will receive money
-    snet service metadata-init src/service_spec $SERVICE_NAME_VAR $WALLET_VAR
+    snet service metadata-init src/service_spec "$DISPLAY_NAME_VAR" $WALLET_VAR
 
     # set the price to use this service
     snet service metadata-set-fixed-price $PRICE_VAR

@@ -5,353 +5,465 @@ using namespace timeSeries;
 
 Sequitur::Sequitur()
 {
-    _idGen = 1;
-    _debug = false;
-    _rules["~0"] = std::vector<std::string>();
+    _rBaseRule = new Rule();
+    _rBaseRule->_usageCount = 0;
+    _genId = 0;
+    _baseRuleAddress = genId();
+    _grammar[_baseRuleAddress] = _rBaseRule;
+    _previousSymbol = NULL;
 }
 
-Sequitur::~Sequitur()
-{
-}
+Sequitur::~Sequitur() {}
 
 int Sequitur::genId()
 {
-    return _idGen++;
+    return _genId++;
 }
 
-void Sequitur::setDebug(bool val)
+void Sequitur::insertIntoGrammar(Rule *rule)
 {
-    _debug = val;
+    int address = genId();
+    rule->_id = address;
+    _grammar[address] = rule;
 }
 
-void Sequitur::getRule(int ruleCode, std::vector<std::string> &rOutRule)
+void Sequitur::eraseRule(Rule *rule)
 {
-    std::string rule_id_string = "~" + std::to_string(ruleCode);
-    if (_rules.find(rule_id_string) != _rules.end())
+    int address = rule->_id;
+    _grammar.erase(address);
+}
+
+void Sequitur::getLastDigram(Obj *&rOutLLast, Obj *&rOutLast)
+{
+    // check digrams
+    int size = _grammar[_baseRuleAddress]->_symbols.size();
+    rOutLast = _grammar[_baseRuleAddress]->_symbols.at(size - 1);
+    rOutLLast = _grammar[_baseRuleAddress]->_symbols.at(size - 2);
+}
+
+int Sequitur::getFirstDigramRepetition()
+{
+    Obj *pLast;
+    Obj *pLlast;
+    getLastDigram(pLlast, pLast);
+
+    for (int i = _grammar[_baseRuleAddress]->_symbols.size() - 4; i >= 0; i--)
     {
-        rOutRule = _rules[rule_id_string];
+        if (*pLlast == *_grammar[_baseRuleAddress]->_symbols[i] && *pLast == *_grammar[_baseRuleAddress]->_symbols[i + 1])
+            return i;
+    }
+
+    return -1;
+}
+
+Rule *Sequitur::checkForDigram()
+{
+    Obj *pLast;
+    Obj *pLlast;
+    getLastDigram(pLlast, pLast);
+    string formed_digram = "";
+    getDigramString(pLlast, pLast, formed_digram);
+
+    if (_digramInRulesMap.find(formed_digram) != _digramInRulesMap.end())
+        return _digramInRulesMap[formed_digram];
+
+    return NULL;
+}
+
+void Sequitur::getDigramString(Obj *&rOutLLast, Obj *&rOutLast, string &rOutString)
+{
+    rOutString = "";
+    if (rOutLLast->isSymbol())
+    {
+        rOutString += "{";
+        rOutString += rOutLLast->_symbol->_symbol;
+        rOutString += "}";
+    }
+    else
+    {
+        rOutString += "~";
+        rOutString += std::to_string(rOutLLast->_rule->_id);
+    }
+    rOutString += "_";
+    if (rOutLast->isSymbol())
+    {
+        rOutString += "{";
+        rOutString += rOutLast->_symbol->_symbol;
+        rOutString += "}";
+    }
+    else
+    {
+        rOutString += "~";
+        rOutString += std::to_string(rOutLast->_rule->_id);
     }
 }
 
-void Sequitur::checkDigram(std::vector<std::string> &rInRule,
-                           std::vector<std::string> &rInDigram,
-                           std::vector<std::vector<std::string>::iterator> &rOutIndexDigramOcurrences)
+bool Sequitur::generateRule()
 {
-    rOutIndexDigramOcurrences.clear();
-    int digram_size = 2;
+    bool generated = false;
 
-    for (int rule_index = rInRule.size() - 2; rule_index >= 0; rule_index--)
+    // get first repetition index
+    int index = getFirstDigramRepetition();
+
+    Obj *pLast;
+    Obj *pLlast;
+    getLastDigram(pLlast, pLast);
+
+    if (index != -1)
     {
-        if (rInRule[rule_index] == rInDigram[0] &&
-            rInRule[rule_index + 1] == rInDigram[1])
-        {
-            bool insert = true;
+        Rule *pNewRule = new Rule();
+        pNewRule->_usageCount = 2;
 
-            if (rOutIndexDigramOcurrences.size() > 0)
+        pNewRule->_symbols.push_back(pLlast);
+        pNewRule->_symbols.push_back(pLast);
+
+        // compute digram ranges
+        Range found_digram_range;
+        if (_grammar[_baseRuleAddress]->_symbols[index]->isSymbol())
+            found_digram_range._start = _grammar[_baseRuleAddress]->_symbols[index]->_symbol->_ranges[0]._start;
+        else
+            found_digram_range._start = _grammar[_baseRuleAddress]->_symbols[index]->_range._start;
+
+        if (_grammar[_baseRuleAddress]->_symbols[index + 1]->isSymbol())
+            found_digram_range._end = _grammar[_baseRuleAddress]->_symbols[index + 1]->_symbol->_ranges[0]._end;
+        else
+            found_digram_range._end = _grammar[_baseRuleAddress]->_symbols[index + 1]->_range._end;
+
+        Range last_rule_range;
+        if (pLlast->isSymbol())
+            last_rule_range._start = pLlast->_symbol->_ranges.at(pLlast->_symbol->_ranges.size() - 1)._start;
+        else
+            last_rule_range._start = pLlast->_range._start;
+
+        if (pLast->isSymbol())
+            last_rule_range._end = pLast->_symbol->_ranges.at(pLast->_symbol->_ranges.size() - 1)._end;
+        else
+            last_rule_range._end = pLast->_range._end;
+
+        // update ranges
+        if (_grammar[_baseRuleAddress]->_symbols[index]->isSymbol())
+            pLlast->_symbol->_ranges.insert(
+                pLlast->_symbol->_ranges.begin(),
+                _grammar[_baseRuleAddress]->_symbols[index]->_symbol->_ranges.begin(),
+                _grammar[_baseRuleAddress]->_symbols[index]->_symbol->_ranges.end());
+
+        if (_grammar[_baseRuleAddress]->_symbols[index + 1]->isSymbol())
+            pLast->_symbol->_ranges.insert(
+                pLast->_symbol->_ranges.begin(),
+                _grammar[_baseRuleAddress]->_symbols[index + 1]->_symbol->_ranges.begin(),
+                _grammar[_baseRuleAddress]->_symbols[index + 1]->_symbol->_ranges.end());
+
+        //insert rule
+        insertIntoGrammar(pNewRule);
+
+        // new object to replace last digram
+        Obj *newRuleObj_1 = new Obj();
+        newRuleObj_1->_rule = pNewRule;
+        newRuleObj_1->_range = found_digram_range;
+
+        // object to replace found digram
+        Obj *newRuleObj_2 = new Obj();
+        newRuleObj_2->_rule = pNewRule;
+        newRuleObj_2->_range = last_rule_range;
+
+        // set digram into rules digram mapping
+        string formed_drigram;
+        getDigramString(pLlast, pLast, formed_drigram);
+        _digramInRulesMap[formed_drigram] = pNewRule;
+
+        // insert range into rule
+        pNewRule->_ruleCoverage.push_back(found_digram_range);
+        pNewRule->_ruleCoverage.push_back(last_rule_range);
+
+        // replace digram from the first found repetition
+        _grammar[_baseRuleAddress]->_symbols[index] = newRuleObj_1;
+        _grammar[_baseRuleAddress]->_symbols.erase(_grammar[_baseRuleAddress]->_symbols.begin() + index + 1);
+
+        // replace last digram
+        _grammar[_baseRuleAddress]->_symbols[_grammar[_baseRuleAddress]->_symbols.size() - 2] = newRuleObj_2;
+        _grammar[_baseRuleAddress]->_symbols.erase(_grammar[_baseRuleAddress]->_symbols.begin() + _grammar[_baseRuleAddress]->_symbols.size() - 1);
+
+        // update rule count and rule utility
+        if (pLast->isRule())
+        {
+            pLast->_rule->_usageCount--;
+            if (pLast->_rule->_usageCount == 1)
             {
-                if (rInRule.begin() + rule_index + 1 == rOutIndexDigramOcurrences.back())
+                // realocate its symbols before deleting
+                pNewRule->_symbols.erase(pNewRule->_symbols.end() - 1);
+                pNewRule->_symbols.insert(pNewRule->_symbols.end() - 1, pLast->_rule->_symbols.begin(), pLast->_rule->_symbols.end());
+
+                // delete rules digram from reference
+                if (pLast->_rule->_symbols.size() == 2)
                 {
-                    insert = false;
+                    string formed_drigram;
+                    getDigramString(pLast->_rule->_symbols[0], pLast->_rule->_symbols[1], formed_drigram);
+                    _digramInRulesMap.erase(formed_drigram);
                 }
-            }
 
-            if (insert)
+                // delete rule
+                eraseRule(pLast->_rule);
+            }
+        }
+        if (pLlast->isRule())
+        {
+            pLlast->_rule->_usageCount--;
+            if (pLlast->_rule->_usageCount == 1)
             {
-                rOutIndexDigramOcurrences.push_back(rInRule.begin() + rule_index);
+                // realocate its symbols before deleting
+                pNewRule->_symbols.erase(pNewRule->_symbols.begin());
+                pNewRule->_symbols.insert(pNewRule->_symbols.begin(), pLlast->_rule->_symbols.begin(), pLlast->_rule->_symbols.end());
+
+                // delete rules digram from reference
+                if (pLlast->_rule->_symbols.size() == 2)
+                {
+                    string formed_drigram;
+                    getDigramString(pLlast->_rule->_symbols[0], pLlast->_rule->_symbols[1], formed_drigram);
+                    _digramInRulesMap.erase(formed_drigram);
+                }
+
+                // delete rule
+                eraseRule(pLlast->_rule);
             }
         }
+
+        generated = true;
     }
-}
-
-void Sequitur::getLastDigram(std::vector<std::string> &rInRule, std::vector<std::string> &rOutDigram)
-{
-    rOutDigram.clear();
-    rOutDigram.push_back(rInRule[rInRule.size() - 2]);
-    rOutDigram.push_back(rInRule[rInRule.size() - 1]);
-}
-
-void Sequitur::verifyRuleExistance(std::vector<std::string> &rInDigram, std::string &rOutRuleKey)
-{
-    std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
-    for (; it != _rules.end(); it++)
+    else
     {
-        if (it->second.size() > 2)
+        // check if rule exist for last digram
+        Rule *rule = checkForDigram();
+
+        if (rule != NULL)
         {
-            continue;
-        }
-
-        if (it->first == "~0")
-        {
-            continue;
-        }
-
-        std::vector<std::vector<std::string>::iterator> index_digram_ocurrences;
-        checkDigram(it->second, rInDigram, index_digram_ocurrences);
-        if (index_digram_ocurrences.size() > 0)
-        {
-            rOutRuleKey = it->first;
-            return;
-        }
-    }
-    return;
-}
-
-bool Sequitur::enforceRulesUtility()
-{
-    bool replaced = false;
-
-    std::vector<std::string> rules_to_erase;
-
-    std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
-    for (; it != _rules.end(); it++)
-    {
-        std::string current_rule = it->first;
-
-        if (current_rule == "~0")
-        {
-            continue;
-        }
-
-        std::vector<std::vector<std::string>::iterator> rule_occurrences_symbols;
-        std::vector<std::string> rule_occurrences;
-        int rule_usage_count = ruleUsageCount(current_rule, rule_occurrences_symbols, rule_occurrences);
-
-        // enforce rule utility only if it has been used once
-        if (rule_usage_count == 1)
-        {
-            if (_debug)
+            if (rule->_symbols.at(0)->isSymbol())
             {
-                printf("Enforcing rule: %s\n", current_rule.c_str());
+                Range new_range;
+                new_range._start = pLlast->_symbol->_ranges.begin()->_start;
+                new_range._end = pLlast->_symbol->_ranges.begin()->_end;
+                rule->_symbols.at(0)->_symbol->_ranges.push_back(new_range);
             }
-            // tell the algorithm that a replacement happened
-            replaced = true;
-
-            for (int rule = 0; rule < rule_occurrences.size(); rule++)
+            else
             {
-                std::string current_rule = rule_occurrences[rule];
-                int symbol_pos = rule_occurrences_symbols[rule] - _rules[current_rule].begin();
-
-                // insert after rule
-                _rules[current_rule].insert(rule_occurrences_symbols[rule] + 1, _rules[it->first].begin(), _rules[it->first].end());
-
-                // remove the correct iterator
-                _rules[current_rule].erase(_rules[current_rule].begin() + symbol_pos);
+                rule->_symbols.at(0)->_rule->_usageCount--;
             }
 
-            // erase rule
-            rules_to_erase.push_back(current_rule);
-            //_rules.erase();
-        }
-    }
-
-    // need to erase after processing all data, since some compilers may lost reference to its elements if removed inside a loop
-    for (int rule = 0; rule < rules_to_erase.size(); rule++)
-    {
-        _rules.erase(rules_to_erase[rule]);
-    }
-
-    return replaced;
-}
-
-int Sequitur::ruleUsageCount(std::string &rInRuleSymbol,
-                             std::vector<std::vector<std::string>::iterator> &rOutRuleOccurrences,
-                             std::vector<std::string> &rOutRules)
-{
-    std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
-    int count = 0;
-    for (; it != _rules.end(); it++)
-    {
-        for (int symbol = 0; symbol < it->second.size(); symbol++)
-        {
-            if (it->second[symbol] == rInRuleSymbol)
+            if (rule->_symbols.at(1)->isSymbol())
             {
-                rOutRuleOccurrences.push_back(it->second.begin() + symbol);
-                rOutRules.push_back(it->first);
-                count++;
+                Range new_range;
+                new_range._start = pLast->_symbol->_ranges.begin()->_start;
+                new_range._end = pLast->_symbol->_ranges.begin()->_end;
+                rule->_symbols.at(1)->_symbol->_ranges.push_back(new_range);
             }
-        }
-    }
-    return count;
-}
-
-bool Sequitur::isRule(std::string &rInSymbol)
-{
-    if (rInSymbol[0] == '~')
-    {
-        return true;
-    }
-    return false;
-}
-
-int Sequitur::countSymbolInRules(const char *pInSymbol)
-{
-    int count = 0;
-    std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
-    for (; it != _rules.end(); it++)
-    {
-        // do not count with rule 0
-        if (it->first == "~0")
-        {
-            continue;
-        }
-
-        //std::vector<std::string> expanded_rule;
-        //getExpandedRuleVector(it->first, expanded_rule);
-        for (int symbol = 0; symbol < it->second.size(); symbol++)
-        {
-            if (it->second[symbol] == pInSymbol)
+            else
             {
-                count++;
-
-                // need to break since this rule already covers this subsequence
-                break;
+                rule->_symbols.at(1)->_rule->_usageCount--;
             }
+
+            Obj *newRuleObj = new Obj();
+            newRuleObj->_rule = rule;
+            rule->_usageCount++;
+
+            // need to set new object range here
+            Range replaced_range;
+            replaced_range._start = _grammar[_baseRuleAddress]->_symbols[_grammar[_baseRuleAddress]->_symbols.size() - 2]->_range._start;
+            replaced_range._end = _grammar[_baseRuleAddress]->_symbols[_grammar[_baseRuleAddress]->_symbols.size() - 1]->_range._end;
+
+            newRuleObj->_range = replaced_range;
+
+            // update coverage
+            rule->_ruleCoverage.push_back(replaced_range);
+
+            // remove references from rule 0
+            _grammar[_baseRuleAddress]->_symbols[_grammar[_baseRuleAddress]->_symbols.size() - 2] = newRuleObj;
+            _grammar[_baseRuleAddress]->_symbols.erase(_grammar[_baseRuleAddress]->_symbols.begin() + _grammar[_baseRuleAddress]->_symbols.size() - 1);
+
+            generated = true;
         }
     }
-    return count;
+
+    return generated;
 }
 
-bool Sequitur::generateRules()
+void Sequitur::insertSymbol(const char *pInSymbol, const int sample, const int windowSize, const bool numerosityReduction)
 {
-    bool grammar_updated = true;
+    Symbol *pSymbol = NULL;
 
-    // check the primary symbol for repetitions
-    std::vector<std::vector<std::string>::iterator> digram_repetitions;
-    std::vector<std::string> last_digram;
-    getLastDigram(_rules["~0"], last_digram);
-    checkDigram(_rules["~0"], last_digram, digram_repetitions);
-
-    std::string rule = "";
-    verifyRuleExistance(last_digram, rule);
-
-    if (digram_repetitions.size() > 1)
+    if (!numerosityReduction)
     {
-        // create new rule only if necessary
-        if (rule.length() <= 0)
-        {
-            rule.append("~" + std::to_string(genId()));
+        // create a symbol for the received word
+        pSymbol = new Symbol();
+        pSymbol->_symbol.assign(pInSymbol);
+        Range symbol_range;
+        symbol_range._start = sample;
+        symbol_range._end = sample + windowSize;
+        pSymbol->_ranges.push_back(symbol_range);
 
-            // insert new rule here to avoid losing ref for the primary symbol
-            _rules[rule] = std::vector<std::string>();
-            _rules[rule].insert(_rules[rule].begin(), last_digram.begin(), last_digram.end());
+        // create an object for this symbol
+        Obj *object = new Obj();
+        object->_symbol = pSymbol;
+        object->_range._start = sample;
+        object->_range._end = sample + windowSize;
+        _rBaseRule->_symbols.push_back(object);
+
+        unsigned int base_rule_size = _grammar[_baseRuleAddress]->_symbols.size();
+
+        if (base_rule_size >= 4)
+        {
+            while (generateRule())
+                ;
         }
 
-        for (unsigned int digram_repetition = 0; digram_repetition < digram_repetitions.size(); digram_repetition++)
+        //printGrammar();
+
+        return;
+    }
+
+    if (_previousSymbol != NULL)
+    {
+        if (_previousSymbol->_symbol != pInSymbol)
         {
-            (*digram_repetitions[digram_repetition]) = rule;
-            _rules["~0"].erase(digram_repetitions[digram_repetition] + 1);
+            // create an object for this symbol
+            Obj *object = new Obj();
+            object->_symbol = _previousSymbol;
+            object->_range._start = sample;
+            object->_range._end = sample + windowSize;
+            _rBaseRule->_symbols.push_back(object);
+
+            unsigned int base_rule_size = _grammar[_baseRuleAddress]->_symbols.size();
+
+            if (base_rule_size >= 4)
+            {
+                while (generateRule())
+                    ;
+            }
+
+            //printGrammar();
+
+            // create a symbol for the received word
+            pSymbol = new Symbol();
+            pSymbol->_symbol.assign(pInSymbol);
+            Range symbol_range;
+            symbol_range._start = sample;
+            symbol_range._end = sample + windowSize;
+            pSymbol->_ranges.push_back(symbol_range);
+        }
+        else
+        {
+            _previousSymbol->_ranges.at(0)._end = sample + windowSize;
         }
     }
     else
     {
-        if (rule.size() > 0)
-        {
-            // replace last digram
-            (*digram_repetitions[0]) = rule;
-            _rules["~0"].erase(digram_repetitions[0] + 1);
-        }
-        else
-        {
-            // tell the system that no change was made
-            grammar_updated = false;
-        }
+        // create a symbol for the received word
+        pSymbol = new Symbol();
+        pSymbol->_symbol.assign(pInSymbol);
+        Range symbol_range;
+        symbol_range._start = sample;
+        symbol_range._end = sample + windowSize;
+        pSymbol->_ranges.push_back(symbol_range);
     }
 
-    // print grammar for each iteration
-    if (grammar_updated && _debug)
-    {
-        printf("Rule generated: %s\n", rule.c_str());
-        printGrammar();
-    }
-
-    return grammar_updated;
-}
-
-void Sequitur::insertSymbol(const char *pInSymbol)
-{
-    if (_debug)
-    {
-        printf("Inserted symbol: %s\n", pInSymbol);
-    }
-
-    int primary_symbol_length = _rules["~0"].size();
-    int minimum_symbol_length = 4;
-
-    _rules["~0"].push_back(std::string(pInSymbol));
-    _lastInsertedSymbol.assign(pInSymbol);
-
-    bool grammar_updated = false;
-    do
-    {
-        if (primary_symbol_length < minimum_symbol_length)
-        {
-            break;
-        }
-
-        // update grammar until there is a possible change to be made
-        grammar_updated = generateRules();
-
-    } while (grammar_updated);
-
-    enforceRulesUtility();
-
-    if (_debug)
-    {
-        printGrammar();
-    }
+    if (pSymbol != NULL)
+        _previousSymbol = pSymbol;
 }
 
 void Sequitur::printGrammar()
 {
-    std::map<std::string, std::vector<std::string>>::iterator it = _rules.begin();
-    for (; it != _rules.end(); it++)
+    map<int, Rule *>::iterator it = _grammar.begin();
+    for (; it != _grammar.end(); it++)
     {
-        printf("%s -> ", it->first.c_str());
-        for (unsigned int symbol = 0; symbol < it->second.size(); symbol++)
+        printf("%d -> ", it->first);
+        for (unsigned int symbol = 0; symbol < it->second->_symbols.size(); symbol++)
         {
-            printf("%s ", it->second[symbol].c_str());
+            if (it->second->_symbols[symbol]->isRule())
+                printf("%d ", it->second->_symbols[symbol]->_rule->_id);
+            else
+            {
+                printf("%s ", it->second->_symbols[symbol]->_symbol->_symbol.c_str());
+            }
         }
         printf("\n");
     }
     printf("\n");
 }
 
-void Sequitur::getExpandedRuleVector(std::string rule, std::vector<std::string> &rOutSymbolVector)
+void Sequitur::printRulesUsageCount()
 {
-    // clear out string to ensure that the op. will be performed ok
-    std::vector<std::string> &rules_symbols = _rules[rule];
-
-    for (unsigned int symbol = 0; symbol < rules_symbols.size(); symbol++)
+    map<int, Rule *>::iterator it = _grammar.begin();
+    for (; it != _grammar.end(); it++)
     {
-        std::string current_symbol = rules_symbols[symbol];
+        printf("%d -> usage = %d\n", it->first, it->second->_usageCount);
+    }
+}
 
-        if (isRule(current_symbol))
+void Sequitur::expandRuleCoverage(Rule *rule, set<int> &coverage)
+{
+    for (int i = 0; i < rule->_ruleCoverage.size(); i++)
+    {
+        int start = rule->_ruleCoverage[i]._start;
+        int end = rule->_ruleCoverage[i]._end;
+
+        for (int point = start; point < end; point++)
+            if (coverage.find(point) == coverage.end())
+                coverage.insert(point);
+    }
+}
+
+void Sequitur::printRulesCoverage()
+{
+    map<int, Rule *>::iterator it = _grammar.begin();
+    for (; it != _grammar.end(); it++)
+    {
+        printf("%d -> coverage = ", it->first);
+        for (int i = 0; i < it->second->_ruleCoverage.size(); i++)
         {
-            getExpandedRuleVector(current_symbol, rOutSymbolVector);
+            int start = it->second->_ruleCoverage[i]._start;
+            int end = it->second->_ruleCoverage[i]._end;
+
+            printf("(%d,%d) ", start, end);
         }
-        else
+        printf("\n");
+    }
+}
+
+bool Sequitur::ruleCoverage(int sampleNumber, Rule *rule)
+{
+    set<int> coverage;
+    expandRuleCoverage(rule, coverage);
+    if (coverage.find(sampleNumber) != coverage.end())
+        return true;
+    return false;
+}
+
+void Sequitur::densityCurve(vector<int> &rOutDensity)
+{
+    map<int, Rule *>::iterator it = _grammar.begin();
+    for (; it != _grammar.end(); it++)
+    {
+        if (it->first != 0)
         {
-            rOutSymbolVector.push_back(current_symbol);
+            set<int> coverage;
+            expandRuleCoverage(it->second, coverage);
+            set<int>::iterator cit = coverage.begin();
+            for (; cit != coverage.end(); cit++)
+                rOutDensity[*cit] += 1;
         }
     }
 }
 
-void Sequitur::expandGrammar(std::string rule, std::string &rOutString)
+void Sequitur::expandGrammar(std::string &rOutString)
 {
-    // clear out string to ensure that the op. will be performed ok
-    std::vector<std::string> &rules_symbols = _rules[rule];
+    expandGrammar(rOutString, _grammar[_baseRuleAddress]);
+}
 
-    for (unsigned int symbol = 0; symbol < rules_symbols.size(); symbol++)
+void Sequitur::expandGrammar(std::string &rOutString, Rule *pInRule)
+{
+    for (int i = 0; i < pInRule->_symbols.size(); i++)
     {
-        std::string current_symbol = rules_symbols[symbol];
-
-        if (isRule(current_symbol))
-        {
-            expandGrammar(current_symbol, rOutString);
-        }
+        if (pInRule->_symbols[i]->isSymbol())
+            rOutString += pInRule->_symbols[i]->_symbol->_symbol;
         else
-        {
-            rOutString.append(current_symbol);
-        }
+            expandGrammar(rOutString, pInRule->_symbols[i]->_rule);
     }
 }

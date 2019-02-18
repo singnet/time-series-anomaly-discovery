@@ -18,38 +18,12 @@ ErdbAnomalyDiscovery::~ErdbAnomalyDiscovery()
 {
 }
 
-void ErdbAnomalyDiscovery::insertTimeSeries(std::vector<double> &rInTimeSeries)
-{
-    _timeSeries.assign(rInTimeSeries.begin(), rInTimeSeries.end());
-
-    std::vector<double> znormed_series;
-    zNorm(_timeSeries, znormed_series);
-
-    // create sax object to generate a sax words
-    SymbolicAggregateApproximation sax(_saxAlphabet, znormed_series);
-
-    for (int i = _slidingWindowSize; i < _timeSeries.size(); i++)
-    {
-        // get subsequence
-        std::vector<double> subsequence;
-        getSubsequence(znormed_series, subsequence, i - _slidingWindowSize, _slidingWindowSize);
-
-        // compute sax word
-        std::string word = "";
-        word = sax.sax(_paaSize, i - _slidingWindowSize, _slidingWindowSize);
-
-        // insert word into sequitur grammar generator
-        _sequitur.insertSymbol(word.c_str());
-
-        // insert word into density curve to keep track of it
-        _densityCurve.insertSymbol(word.c_str());
-    }
-}
-
 void ErdbAnomalyDiscovery::insertSample(const double sample)
 {
     // insert sample into time series
     _timeSeries.push_back(sample);
+
+    std::string word = "";
 
     // check time series size so far and decide to calculate a new sax word or not
     if (_timeSeries.size() >= _slidingWindowSize)
@@ -61,81 +35,29 @@ void ErdbAnomalyDiscovery::insertSample(const double sample)
         std::vector<double> subsequence;
         getSubsequence(_timeSeries, subsequence, word_start_index, _slidingWindowSize);
 
-        // normalize time series with znorm
-        std::vector<double> znormed_subsequence;
-        zNorm(subsequence, znormed_subsequence);
-
         // create sax object to generate a sax word
-        SymbolicAggregateApproximation sax(_saxAlphabet, znormed_subsequence);
+        SymbolicAggregateApproximation sax(_saxAlphabet, subsequence);
 
         // compute sax word
-        std::string word = "";
         word = sax.sax(_paaSize);
 
         // insert word into sequitur grammar generator
-        _sequitur.insertSymbol(word.c_str());
-
-        // insert word into density curve to keep track of it
-        _densityCurve.insertSymbol(word.c_str());
+        _sequitur.insertSymbol(word.c_str(), word_start_index, _slidingWindowSize, true);
     }
 }
 
-void ErdbAnomalyDiscovery::getAnomalies(std::vector<int> &rOutAnomaliesIndex, std::string *pOutAnomaliesIndexString, int threshold, bool debug)
+DensityCurve *ErdbAnomalyDiscovery::getDensityCurve()
 {
-    // update density curve and calculate max and min, globall and locals
-    _densityCurve.updateDensityCurve(_sequitur, threshold);
+    // create a density curve object
+    DensityCurve *curve = new DensityCurve();
 
-    // get anomalies with the efficient rule density-base anomaly discovery method
-    if (threshold > 1)
-    {
-        _densityCurve.getThresholdDetectedAnomalies(rOutAnomaliesIndex);
-    }
-    else
-    {
-        _densityCurve.getGlobalMinDensities(rOutAnomaliesIndex);
-    }
+    // get the densities generated alongside with the sequitur's algorithm
+    std::vector<int> densities(_timeSeries.size(), 0);
+    _sequitur.densityCurve(densities);
 
-    // extract string if output string is non-null
-    if (pOutAnomaliesIndexString != nullptr)
-    {
-        std::stringstream out_string_stream;
-        std::copy(rOutAnomaliesIndex.begin(), rOutAnomaliesIndex.end(), std::ostream_iterator<int>(out_string_stream, " "));
-        pOutAnomaliesIndexString->assign(out_string_stream.str());
-    }
+    // set the generated curve and original time series into the density curve object to be handled
+    curve->setCurve(_timeSeries, densities, _slidingWindowSize);
 
-    if (debug)
-    {
-        printf("\n\n---- request ----\n\nReceived time series:\n");
-        printSeries(_timeSeries);
-
-        printf("\nAlphabet:\n");
-        for (int i = 0; i < _saxAlphabet.size(); i++)
-        {
-            printf("%s ", _saxAlphabet[i].c_str());
-        }
-        printf("\n");
-
-        printf("\nSliding window size: %d\npaa size: %d\n", _slidingWindowSize, _paaSize);
-        printf("\nGenerated sequitur grammar:\n\n");
-        _sequitur.printGrammar();
-        printf("\nDensity curve statistics:\n\n");
-        _densityCurve.printDensityCurve();
-        _densityCurve.saveCsv("last_density_curve.csv");
-        printf("\nAnomalies index:\n\n");
-        printAnomalies(rOutAnomaliesIndex);
-    }
-}
-
-void ErdbAnomalyDiscovery::printAnomalies(std::vector<int> &rInAnomaliesIndex)
-{
-    for (int index = 0; index < rInAnomaliesIndex.size(); index++)
-    {
-        printf("%d ", rInAnomaliesIndex[index]);
-    }
-    printf("\n");
-}
-
-void ErdbAnomalyDiscovery::getDensityCurve(DensityCurve &rOutDensityCurve)
-{
-    rOutDensityCurve = _densityCurve;
+    // return the generated curve
+    return curve;
 }
