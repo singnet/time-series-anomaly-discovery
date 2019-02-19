@@ -27,7 +27,6 @@ DEPLOY_TEST_CALL_INPUT="{\"timeseries\":\"https://raw.githubusercontent.com/Gram
                   \"slidingwindowsize\":\"100\", \
                   \"alphabet\":\"3\", \
                   \"paasize\":\"2\", \
-                  \"detectionthreshold\":\"1\", \
                   \"debugflag\":\"0\"}"
 
 # function to call

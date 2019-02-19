@@ -88,14 +88,14 @@ void DensityCurve::getJson(
     std::ostringstream density_stream;
     std::ostringstream normazied_stream;
     std::ostringstream inverted_stream;
-    time_series_stream << "[['point', 'value']," << std::endl;
-    density_stream << "[['point', 'value']," << std::endl;
-    normazied_stream << "[['point', 'value']," << std::endl;
-    inverted_stream << "[['point', 'value']," << std::endl;
+    time_series_stream << "[[\"point\", \"value\"],";
+    density_stream << "[[\"point\", \"value\"],";
+    normazied_stream << "[[\"point\", \"value\"],";
+    inverted_stream << "[[\"point\", \"value\"],";
     for (int i = 0; i < _density.size() - 1; i++)
     {
-        int time_s_val = _timeSeries[i];
         int density_cv_val = 0;
+        double time_s_val = _timeSeries[i];
         double normalized_density_cv_val = 0;
         double inverted_density_cv_val = 0;
         if (i < _windowSize * 2 || i >= _density.size() - 1 - _windowSize * 2 )
@@ -111,15 +111,15 @@ void DensityCurve::getJson(
             inverted_density_cv_val = _inverted[i];
         }
 
-        time_series_stream << "[" << i + 1 << ", " << time_s_val << "]," << std::endl;
-        density_stream << "[" << i + 1 << ", " << density_cv_val << "]," << std::endl;
-        normazied_stream << "[" << i + 1 << ", " << normalized_density_cv_val << "]," << std::endl;
-        inverted_stream << "[" << i + 1 << ", " << inverted_density_cv_val << "]," << std::endl;
+        time_series_stream << "[" << i + 1 << ", " << time_s_val << "],";
+        density_stream << "[" << i + 1 << ", " << density_cv_val << "],";
+        normazied_stream << "[" << i + 1 << ", " << normalized_density_cv_val << "],";
+        inverted_stream << "[" << i + 1 << ", " << inverted_density_cv_val << "],";
     }
-    time_series_stream << "[" << _timeSeries.size() << ", " << 0 << "]]" << std::endl;
-    density_stream << "[" << _density.size() << ", " << 0 << "]]" << std::endl;
-    normazied_stream << "[" << _normalized.size() << ", " << 0 << "]]" << std::endl;
-    inverted_stream << "[" << _inverted.size() << ", " << 0 << "]]" << std::endl;
+    time_series_stream << "[" << _timeSeries.size() << ", " << _timeSeries.size() - 1 << "]]";
+    density_stream << "[" << _density.size() << ", " << 0 << "]]";
+    normazied_stream << "[" << _normalized.size() << ", " << 0 << "]]";
+    inverted_stream << "[" << _inverted.size() << ", " << 0 << "]]";
 
     // set the output json string
     rOutTimeSeries.assign(time_series_stream.str());
