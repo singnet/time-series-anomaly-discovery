@@ -94,8 +94,8 @@ void DensityCurve::getJson(
     inverted_stream << "[[\"point\", \"value\"],";
     for (int i = 0; i < _density.size() - 1; i++)
     {
-        int time_s_val = _timeSeries[i];
         int density_cv_val = 0;
+        double time_s_val = _timeSeries[i];
         double normalized_density_cv_val = 0;
         double inverted_density_cv_val = 0;
         if (i < _windowSize * 2 || i >= _density.size() - 1 - _windowSize * 2 )
