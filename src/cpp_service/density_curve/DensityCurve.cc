@@ -88,26 +88,24 @@ void DensityCurve::getJson(
     std::ostringstream density_stream;
     std::ostringstream normazied_stream;
     std::ostringstream inverted_stream;
-    time_series_stream << "[[\"point\", \"value\"]," << std::endl;
-    density_stream << "[[\"point\", \"value\"]," << std::endl;
-    normazied_stream << "[[\"point\", \"value\"]," << std::endl;
-    inverted_stream << "[[\"point\", \"value\"]," << std::endl;
+    time_series_stream << "[['point', 'value']," << std::endl;
+    density_stream << "[['point', 'value']," << std::endl;
+    normazied_stream << "[['point', 'value']," << std::endl;
+    inverted_stream << "[['point', 'value']," << std::endl;
     for (int i = 0; i < _density.size() - 1; i++)
     {
-        int time_s_val = 0;
+        int time_s_val = _timeSeries[i];
         int density_cv_val = 0;
         double normalized_density_cv_val = 0;
         double inverted_density_cv_val = 0;
         if (i < _windowSize * 2 || i >= _density.size() - 1 - _windowSize * 2 )
         {
-            time_s_val = 0;
             density_cv_val = 0;
             normalized_density_cv_val = 0;
             inverted_density_cv_val = 0;
         }
         else
         {
-            time_s_val = _timeSeries[i];
             density_cv_val = _density[i];
             normalized_density_cv_val = _normalized[i];
             inverted_density_cv_val = _inverted[i];
