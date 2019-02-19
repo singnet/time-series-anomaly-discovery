@@ -116,7 +116,7 @@ void DensityCurve::getJson(
         normazied_stream << "[" << i + 1 << ", " << normalized_density_cv_val << "],";
         inverted_stream << "[" << i + 1 << ", " << inverted_density_cv_val << "],";
     }
-    time_series_stream << "[" << _timeSeries.size() << ", " << _timeSeries.size() - 1 << "]]";
+    time_series_stream << "[" << _timeSeries.size() << ", " << _timeSeries[_timeSeries.size() - 1] << "]]";
     density_stream << "[" << _density.size() << ", " << 0 << "]]";
     normazied_stream << "[" << _normalized.size() << ", " << 0 << "]]";
     inverted_stream << "[" << _inverted.size() << ", " << 0 << "]]";
