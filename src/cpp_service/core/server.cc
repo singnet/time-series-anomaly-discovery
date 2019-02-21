@@ -28,7 +28,7 @@ using timeSeriesAnomalyDetection::OutputString;
 
 using namespace timeSeries;
 
-#define MAX_SAMPLES 1000
+#define MAX_SAMPLES 10000
 
 class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Service
 {
