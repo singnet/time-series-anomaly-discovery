@@ -8,6 +8,7 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/security/server_credentials.h>
 
+#include "../piecewise_aggregate_approximation/PiecewiseAggregateApproximation.h"
 #include "../anomaly_discovery/ErdbAnomalyDiscovery.h"
 #include "../utils/timeSeriesUtils.h"
 #include "timeSeriesAnomalyDetection.grpc.pb.h"
@@ -26,6 +27,8 @@ using timeSeriesAnomalyDetection::InputParameters;
 using timeSeriesAnomalyDetection::OutputString;
 
 using namespace timeSeries;
+
+#define MAX_SAMPLES 1000
 
 class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Service
 {
@@ -83,12 +86,12 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         // get arguments from input
         bool loading_status = buildArgs(pInInput, time_series, alphabet, sliding_window_range, paa_size, debug_status);
 
-        if (!loading_status)
+        if (!loading_status || time_series.size() < 20)
         {
-            pOutput->set_timeseries("");
-            pOutput->set_density("");
-            pOutput->set_normalized("");
-            pOutput->set_inverted("");
+            pOutput->set_timeseries("[[\"point\", \"value\"],[0,0]]");
+            pOutput->set_density("[[\"point\", \"value\"],[0,0]]");
+            pOutput->set_normalized("[[\"point\", \"value\"],[0,0]]");
+            pOutput->set_inverted("[[\"point\", \"value\"],[0,0]]");
             return Status::OK;
         }
 
@@ -102,7 +105,22 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         // create an anomaly discovery object
         ErdbAnomalyDiscovery *anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
 
-        // insert received time series into this anomaly detector
+        // generate valid subsequence, reduce dimentionality
+        if(time_series.size() >= MAX_SAMPLES) 
+        {
+            PiecewiseAggregateApproximation paa(&time_series, MAX_SAMPLES);
+            std::vector<double> *pApproximatedSeries = paa.getApproximatedSeries();
+            time_series.assign(pApproximatedSeries->begin(), pApproximatedSeries->end());
+        }
+
+        // guarantee that the parameters will be optimal
+        if(sliding_window_range <= 10 || sliding_window_range >= MAX_SAMPLES || sliding_window_range >= time_series.size()) 
+        {
+            sliding_window_range = 10;
+            printf("Using new sliding window size: %d\n\n", sliding_window_range);
+        }
+
+        // insert samples for the detection algorithm
         for (unsigned int sample = 0; sample < time_series.size(); sample++)
         {
             anomaly_discovery->insertSample(time_series[sample]);
