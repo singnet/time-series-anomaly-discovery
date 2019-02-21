@@ -106,7 +106,7 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         ErdbAnomalyDiscovery *anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
 
         // generate valid subsequence, reduce dimentionality
-        if(time_series.size() >= MAX_SAMPLES) 
+        if(time_series.size() > MAX_SAMPLES) 
         {
             PiecewiseAggregateApproximation paa(&time_series, MAX_SAMPLES);
             std::vector<double> *pApproximatedSeries = paa.getApproximatedSeries();
