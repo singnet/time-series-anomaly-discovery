@@ -5,7 +5,7 @@
 #include "utilsImpl.h"
 #include "utils.h"
 
-#define READ_LIMIT 2000
+#define READ_LIMIT 1000
 
 using namespace timeSeries;
 
