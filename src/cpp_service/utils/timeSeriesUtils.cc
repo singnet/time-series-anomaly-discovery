@@ -5,7 +5,52 @@
 #include "utilsImpl.h"
 #include "utils.h"
 
+#define READ_LIMIT 2000
+
 using namespace timeSeries;
+
+static bool is_number(const std::string& s)
+{
+    if(s.length() == 0)
+        return false;
+
+    std::string::const_iterator it = s.begin();
+    if(s.size() > 1 && (s[0] == '-' || s[0] == '+'))
+        it++;
+    
+    if((*it) == '.' || (*it) == ',' || !std::isdigit(*it))
+        return false;
+
+    int found_dot = 0;
+    int found_comma = 0;
+    while (it != s.end()){
+        if(found_dot > 0 && found_comma > 0)
+            return false;
+
+        if(found_dot > 1 || found_comma > 1)
+            return false;
+
+        if((*it) == '.')
+            found_dot++;
+        else
+            if((*it) == ',')
+                found_comma++;
+            else
+                if(!std::isdigit(*it))
+                    if((*it) != '\n')
+                        return false;
+        
+        ++it;
+    }
+
+    if(found_dot > 0 && found_comma > 0)
+        return false;
+
+    if(found_dot > 1 || found_comma > 1)
+        return false;
+
+    return true;
+}
 
 void timeSeries::getSubsequence(std::vector<double> &rInSeries, std::vector<double> &rOutSubsequence, const int start, const int range)
 {
@@ -100,8 +145,10 @@ void timeSeries::printSeries(std::vector<double> &rInSubSequence)
     printf("\n");
 }
 
-void timeSeries::loadSeriesCsv(const char *pInOutputFile, std::vector<double> &rOutSeries, const bool hasHeader)
+bool timeSeries::loadSeriesCsv(const char *pInOutputFile, std::vector<double> &rOutSeries, const bool hasHeader)
 {
+    bool ret = true;
+
     // guarantee that the output series vector will be clean
     rOutSeries.clear();
 
@@ -116,11 +163,22 @@ void timeSeries::loadSeriesCsv(const char *pInOutputFile, std::vector<double> &r
 
     while ((getline(&readed_line, &line_length, pSeriesFile)) != -1)
     {
+        if(!is_number(readed_line)){
+            ret = false;
+            break;
+        }
+
         double series_sample = atof(readed_line);
         rOutSeries.push_back(series_sample);
+
+        if(rOutSeries.size() == READ_LIMIT){
+            break;
+        }
     }
 
     fclose(pSeriesFile);
+
+    return ret;
 }
 
 void timeSeries::loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeries, bool &rOutStatus, const bool hasHeader)
@@ -137,7 +195,7 @@ void timeSeries::loadSeriesURL(const char *pInUrl, std::vector<double> &rOutSeri
     }
     else
     {
-        loadSeriesCsv(tmp_series_file_name.c_str(), rOutSeries, hasHeader);
+        rOutStatus = loadSeriesCsv(tmp_series_file_name.c_str(), rOutSeries, hasHeader);
     }
 
     // remove temp file
