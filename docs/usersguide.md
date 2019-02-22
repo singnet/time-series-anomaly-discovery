@@ -170,7 +170,7 @@ https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/data/ecg060
 This service output two interactive charts as depicted in Fig. 2. The top chart represents the original time series and the bottom one represents the rules densities obtained from the compressed free-context grammar. Higher values of the density curve means that it is more likely for that sample to be an anomaly in the original time series. 
 
 <p align="center">
-  <img width="60%" height="60%" src="./assets/output.png">
+  <img width="80%" height="80%" src="./assets/output.png">
   <br/>
   <b>Fig. 2 - Service output interface. The top chart represents the input time series and the bottom one represents the generated grammar rules density curve. Red regions depicted in the time series chart are detected anomalies given a detection threshold. 
   </b>
@@ -179,7 +179,7 @@ This service output two interactive charts as depicted in Fig. 2. The top chart 
 Anomalies are highlighted as red zones in the top chart in Fig. 2 and are detected through a threshold. When a sample surpasses the defined threshold in the density curve chart, it is marked in red in the original time series. To change the detection threshold, as depicted in Fig. 3, the bottom left slider can be used.
 
 <p align="center">
-  <img width="60%" height="60%" src="./assets/changed_threshold.png">
+  <img width="80%" height="80%" src="./assets/changed_threshold.png">
   <br/>
   <b>Fig. 3 - Anomalies detection after changing the threshold value. 
   </b>
@@ -194,8 +194,8 @@ This service also allows to interact with the displayed charts with two operatio
 In order to perform a zoom in the original time series chart, hold and drag a region on top of it with the left mouse buttom as depicted in Fig. 4 A. 
 
 <p align="center">
-  <img width="60%" height="60%" src="./assets/zoom.png">
-  <img width="60%" height="60%" src="./assets/zoomed.png">
+  <img width="80%" height="80%" src="./assets/zoom.png">
+  <img width="80%" height="80%" src="./assets/zoomed.png">
   <br/>
   <b>Fig. 4 - Time series zooming area created by holding the left mouse button and drag. 
   </b>
@@ -208,7 +208,7 @@ The resultant for this operation is depicted in Fig. 4 B as the zoomed selected 
 To insert a reference point just press the left mouse button on top of any of the charts line. This will mark it until a new point is assigned as depicted in Fig. 5.
 
 <p align="center">
-  <img width="30%" height="30%" src="./assets/markpoint.png">
+  <img width="50%" height="50%" src="./assets/markpoint.png">
   <br/>
   <b>Fig. 5 - Point marking example. Mark point placed after pressing the left mouse button on top of the original time series chart.
   </b>
@@ -219,7 +219,7 @@ To insert a reference point just press the left mouse button on top of any of th
 It is also possible to display detailed information about samples just by passing the mouse cursor over any of the chart's lines, as depicted in Fig 6.
 
 <p align="center">
-  <img width="30%" height="30%" src="./assets/annotation.png">
+  <img width="50%" height="50%" src="./assets/annotation.png">
   <br/>
   <b>Fig. 6 - Point annotation informing its correct position and value.
   </b>
