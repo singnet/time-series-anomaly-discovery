@@ -6,7 +6,7 @@
 [cpp-tutorial]: https://github.com/singnet/wiki/tree/master/tutorials/howToWriteCPPService
 [setup-script]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/setup.sh
 [service_confi_file]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/service_conf
-[users_guide]: https://github.com/singnet/time-series-anomaly-discovery/blob/master/docs/usersguide.md
+[users_guide]: ./docs/usersguide.md
 
 [singnet_service_tutorial]:https://dev.singularitynet.io/tutorials/publish/
 
