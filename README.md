@@ -173,7 +173,7 @@ The presented output represents the indexes in which anomalies were detected in 
 
 ## Running with DAEMON
 
-In order to build and get this service running with the DAEMON, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
+In order to build and get this service running with the DAEMON, assuming that it was already published, run the [setup.sh][setup-script] script located in the project's root directory with the *-r* flag. This flag will force the source to be built, perform tests, run the localhost GRPC server, and the DAEMON to handle requests to this service.
 
 
 ```
