@@ -21,13 +21,3 @@ ORGANIZATION_TO_PUBLISH="snet"
 IPFS_END_POINT="http://ipfs.singularitynet.io:80"
 CRIPTOCURRENCY_NETWORK="https://kovan.infura.io"
 REGISTRY_KEY="0xe331bf20044a5b24c1a744abc90c1fd711d2c08d"
-
-# test call input
-DEPLOY_TEST_CALL_INPUT="{\"timeseries\":\"https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/data/ecg0606_1.csv\", \
-                  \"slidingwindowsize\":\"100\", \
-                  \"alphabet\":\"5\", \
-                  \"paasize\":\"10\", \
-                  \"debugflag\":\"0\"}"
-
-# function to call
-DEPLOY_TEST_CALL_METHOD=detectAnomalies
