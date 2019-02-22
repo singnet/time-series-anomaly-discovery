@@ -208,7 +208,7 @@ The resultant for this operation is depicted in Fig. 4 B as the zoomed selected 
 To insert a reference point just press the left mouse button on top of any of the charts line. This will mark it until a new point is assigned as depicted in Fig. 5.
 
 <p align="center">
-  <img width="60%" height="60%" src="./assets/markpoint.png">
+  <img width="50%" height="50%" src="./assets/markpoint.png">
   <br/>
   <b>Fig. 5 - Point marking example. Mark point placed after pressing the left mouse button on top of the original time series chart.
   </b>
@@ -219,7 +219,7 @@ To insert a reference point just press the left mouse button on top of any of th
 It is also possible to display detailed information about samples just by passing the mouse cursor over any of the chart's lines, as depicted in Fig 6.
 
 <p align="center">
-  <img width="60%" height="60%" src="./assets/annotation.png">
+  <img width="50%" height="50%" src="./assets/annotation.png">
   <br/>
   <b>Fig. 6 - Point annotation informing its correct position and value.
   </b>
