@@ -57,7 +57,7 @@ If you are not familiarized with docker you can proceed with the local instalati
 
 ### Docker
 
-This project provides two docker files located in the [Dockerfiles][docker_files] folder. One is a basic C++ service based Dockerfile to allow to build basic docker images ready to run C++ services. On the other hand, the other one incorporate the service source, DAEMON, and a final CMD command to run the service directly with the docker 'run' command. 
+This project provides two docker files located in the [Dockerfiles][docker_files] folder. One of them allows you to build clean C++ GRPC ready images  to run and develop C++ services. On the other hand, the other one incorporate the service source, all the [Sigularity Net Service][singnet_service_tutorial] stuff to interact with the block chain, and a final CMD command to run the service directly with the docker 'run' command. 
 
 In order to build a basic C++ service-ready image use the following command in the project's root directory.
 
