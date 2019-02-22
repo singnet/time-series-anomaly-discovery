@@ -53,7 +53,7 @@ For a detailed explanation about how this service works see the [user's guide][u
 
 ## Getting Started
 
-If you are not familiarized with docker you can proceed with the local instalation, however we higly recommend for this project to be built inside a docker container due some of its dependencies that can not be easily removed from your system (e.g. GRPC c++ library). If you choose to use docker and know nothing about it, follow this [docker related tutorial][docker_tutorial] before proceeding.
+If you are not familiarized with docker you can proceed with the local instalation, however we higly recommend for this project to be built inside a docker container due to the fact that some of its dependencies can not be easily removed from your system (e.g. GRPC C++ library). If you choose to use docker and know nothing about it, follow this [docker related tutorial][docker_tutorial] before proceeding.
 
 ### Docker
 
