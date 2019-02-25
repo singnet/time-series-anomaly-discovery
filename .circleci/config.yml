@@ -133,6 +133,7 @@ jobs:
               -v /home/ubuntu/$REPOSITORY/config:/config \
               -v /home/ubuntu/$REPOSITORY/etcd:/etcd \
               -v /home/ubuntu/$REPOSITORY/storage-data-dir-1.etcd:/storage-data-dir-1.etcd \
+              -v /etc/letsencrypt:/etc/letsencrypt \
               --name $PROD_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME /bin/bash -c \
                 "cd /home/ubuntu; \
                  git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git; \

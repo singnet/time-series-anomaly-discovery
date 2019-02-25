@@ -71,7 +71,6 @@ HOST_IP_ADDRESS_VAR=
 # blockchain
 ORGANIZATION_TO_PUBLISH_VAR=
 IPFS_END_POINT_VAR=
-CRIPTOCURRENCY_NETWORK_VAR=
 REGISTRY_KEY_VAR=
 
 # this script's path
@@ -106,7 +105,6 @@ if [ -f "$PROJECT_PATH/service_conf" ]; then
     # blockchain
     ORGANIZATION_TO_PUBLISH_VAR=$ORGANIZATION_TO_PUBLISH
     IPFS_END_POINT_VAR=$IPFS_END_POINT
-    CRIPTOCURRENCY_NETWORK_VAR=$CRIPTOCURRENCY_NETWORK
     REGISTRY_KEY_VAR=$REGISTRY_KEY
         
     echo "Config file loaded."
@@ -119,7 +117,8 @@ fi
 run()
 {
     # run daemon for kovan
-    snetd --config ./snetd_configs/snetd.kovan.json & 
+    # (TODO:check if need to run directly from there)
+    # snetd --config ./snetd_configs/snetd.mainnet.json & 
 
     # run daemon for the ropsten
     snetd --config ./snetd_configs/snetd.ropsten.json & 
@@ -217,7 +216,7 @@ if [ $PUBLISH_VAR == 1 ]; then
     snet service metadata-set-fixed-price $PRICE_VAR
 
     # set the local port to access this service server
-    snet service metadata-add-endpoints http://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
+    snet service metadata-add-endpoints https://$HOST_IP_ADDRESS_VAR:$SERVICE_DAEMON_PORT_VAR
 
     # add description to this service
     JSON="{\"description\":\"$SERVICE_DESCRIPTION_VAR\", \"url\":\"$REPO_URL_VAR\"}"
