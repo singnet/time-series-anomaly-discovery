@@ -18,12 +18,12 @@ Anomalies are everywhere and can cause death, diseases, disasters, financial cri
 
 In order to detect anomalies efficiently, the deployed method is based on grammar-compression. The grammar-compression performs a transformation in the received time series samples, reducing its size and grouping similar regions into grammar rules clusters. Those clusters are used to build a grammar rules density curve that is used to detect the anomalies in the original time series. 
 
-For the algorithm to be able perform a grammar-compression over a time series, the user needs to specify an URL containing a valid time series CSV file and a sliding window size. As depicted in Fig. 1, this service provides a simple user interface to receive the aforementioned input parameters. It is important to note that the sliding window is used to discretize data and form symbols to serve as input to the grammar-compression algorithm, consequently it can drastically change the obtained results.
+For the algorithm to be able perform a grammar-compression over a time series, the user needs to specify an URL containing a valid time series CSV file. As depicted in Fig. 1, this service provides a simple user interface to receive the aforementioned input parameter. It is important to note that to allow the service to detect anomalies, a sliding window is configured with 7% of the total size of the input time series.
 
 <p align="center">
-  <img width="460" height="300" src="./assets/input.jpg">
+  <img width="70%" height="70%" src="./assets/input.jpg">
   <br/>
-  <b>Fig. 1 - Service input interface. The first parameter is an URL containing the time series CSV file and the second parameter is the sliding window size.
+  <b>Fig. 1 - Service input interface. The first parameter is an URL containing the time series CSV file.
   </b>
 </p>
 
