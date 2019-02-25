@@ -33,23 +33,36 @@
 
 class Obj;
 
+/**
+ * \class Rule
+ *
+ * This class is used to easily represent a grammar rule. It contain 
+ * the rule coverage vector (rule span intervals), its depth, length, usage,
+ * and symbols.
+ *
+ * \author (last to touch it) $Author: Alysson Ribeiro da Silva
+ *
+ * Contact: alysson@singularitynet.io
+ */
 class Rule
 {
   public:
     /**
-     */
+      * This object constructor.
+      */
     Rule() {}
 
     /**
-    */
+      * This object destructor.
+      */
     ~Rule() {}
 
-    int _id;                          ///<
-    int _usageCount;                  ///<
-    int _length;                      ///<
-    int _depth;                       ///<
-    std::vector<Range> _ruleCoverage; ///<
-    std::vector<Obj *> _symbols;      ///<
+    int _id;                          ///< Id used to represent this rule.
+    int _usageCount;                  ///< This rule usage count.
+    int _length;                      ///< This rule length in terms of rule span.
+    int _depth;                       ///< This rule depth in the grammar tree.
+    std::vector<Range> _ruleCoverage; ///< This rule coverage vector containg its ranges.
+    std::vector<Obj *> _symbols;      ///< This rule symbols composed by sequitur's objects.
 };
 
 #endif

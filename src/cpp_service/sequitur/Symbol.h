@@ -31,19 +31,30 @@
 
 #include "Range.h"
 
+/**
+ * \class Symbol
+ *
+ * This class allows to store symbols and their ranges inside the original time series or sequence of words.
+ *
+ * \author (last to touch it) $Author: Alysson Ribeiro da Silva
+ *
+ * Contact: alysson@singularitynet.io
+ */
 class Symbol
 {
   public:
     /**
-     */
+      * This object constructor.
+      */
     Symbol() {}
 
     /**
-     */
+      * This object destructor.
+      */
     ~Symbol() {}
 
-    std::string _symbol;        ///<
-    std::vector<Range> _ranges; ///<
+    std::string _symbol;        ///< Holds the symbol string.
+    std::vector<Range> _ranges; ///< Holds all ranges were this symbol appears.
 };
 
 #endif

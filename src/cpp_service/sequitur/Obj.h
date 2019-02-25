@@ -31,11 +31,23 @@
 #include "Symbol.h"
 #include "Rule.h"
 
+/**
+ * \class Obj
+ *
+ * This class holds an object that can represent a rule of a symbol.
+ * It is primarily used to avoid string operations when handling the sequitur's grammar.
+ *
+ * \author (last to touch it) $Author: Alysson Ribeiro da Silva
+ *
+ * Contact: alysson@singularitynet.io
+ */
+
 class Obj
 {
   public:
     /**
-     */
+      * This object constructor.
+      */
     Obj()
     {
         _symbol = NULL;
@@ -43,13 +55,15 @@ class Obj
     }
 
     /**
-     */
+      * This object destructor.
+      */
     ~Obj()
     {
     }
 
     /**
-     */
+      * This method verifies if this object represents a symbol.
+      */
     bool isSymbol()
     {
         if (_symbol != NULL)
@@ -58,7 +72,8 @@ class Obj
     }
 
     /**
-     */
+      * This method verifies if this object represents a rule.
+      */
     bool isRule()
     {
         if (_rule != NULL)
@@ -67,7 +82,8 @@ class Obj
     }
 
     /**
-     */
+      * This method compares two objects if they are from the same type.
+      */
     bool operator==(Obj &B)
     {
         if (isSymbol() && B.isSymbol())
@@ -85,9 +101,9 @@ class Obj
         return false;
     }
 
-    Range _range;    ///<
-    Symbol *_symbol; ///<
-    Rule *_rule;     ///<
+    Range _range;    ///< Variable that holds a range span for this object.
+    Symbol *_symbol; ///< Variable that holds a Symbol for this object.
+    Rule *_rule;     ///< Variable that holds a rule object for this.
 };
 
 #endif
