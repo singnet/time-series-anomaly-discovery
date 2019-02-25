@@ -73,12 +73,6 @@ In this section is shown some example input parameters for this service.
 https://raw.githubusercontent.com/singnet/time-series-anomaly-discovery/master/resources/time_series/ecg0606_1.csv
 ```
 
-#### Example input sliding window size
-
-```
-100
-```
-
 #### Response for the example input parameters
 
 This service output two interactive charts as depicted in Fig. 2. The top chart represents the original time series and the bottom one represents the rules densities obtained from the compressed grammar. Higher values of the density curve means that it is more likely for that sample to be an anomaly in the original time series. 
