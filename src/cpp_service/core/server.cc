@@ -118,7 +118,7 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         }
 
         // fixed sliding window size
-        sliding_window_range = (double)time_series.size() * 0.07;
+        sliding_window_range = (double)time_series.size() * 0.05;
 
         // create an anomaly discovery object
         ErdbAnomalyDiscovery *anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
