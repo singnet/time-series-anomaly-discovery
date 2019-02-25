@@ -29,20 +29,31 @@
 
 #include <set>
 
+/**
+ * \class Range
+ *
+ * This class holds a range for any sequitur's grammar objects.
+ *
+ * \author (last to touch it) $Author: Alysson Ribeiro da Silva
+ *
+ * Contact: alysson@singularitynet.io
+ */
 class Range
 {
   public:
     /**
-     */
+      * Constructor for this object.
+      */
     Range() {}
     
     /**
-     */
+      * Constructor for this object.
+      */
     ~Range() {}
 
-    std::set<int> _ruleBelonging; ///<
-    int _start;                   ///<
-    int _end;                     ///<
+    std::set<int> _ruleBelonging; ///< This set holds the rule belonging for this range. 
+    int _start;                   ///< This variable holds the starting position for this range.
+    int _end;                     ///< This variable holds the ending position for this range.
 };
 
 #endif

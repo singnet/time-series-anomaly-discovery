@@ -6,9 +6,6 @@
 # -------------------------------------------- #
 ################################################
 
-# setup dev alias
-alias dev_test='make clean;git add *; git commit -m "fixing dockerfile"; git push origin master; docker rmi dev_test:dev_test --force; docker build --no-cache -t dev_test:dev_test .;docker run -it dev_test:dev_test'
-
 # command received flags
 COMPILE_VAR=0
 RUN_VAR=0
