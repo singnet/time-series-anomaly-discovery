@@ -7,6 +7,9 @@
     "passthrough_endpoint": "http://localhost:7055",
     "organization_id": "snet",
     "service_id": "time-series-anomaly-discovery",
+
+    "ssl_cert": "/etc/letsencrypt/live/bh.singularitynet.io/fullchain.pem",
+    "ssl_key": "/etc/letsencrypt/live/bh.singularitynet.io/privkey.pem",
   
     "payment_channel_storage_server": {
       "id": "storage-ropsten",
