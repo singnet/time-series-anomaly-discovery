@@ -219,9 +219,6 @@ It is important to note that the DAEMON listen to outside requests and the GRPC 
 <details><summary>Click here to see the commands called by './setup.sh -r'</summary><p>
     
 ```
-    # run daemon for kovan
-    snetd --config ./snetd_configs/snetd.kovan.json & 
-
     # run daemon for the ropsten
     snetd --config ./snetd_configs/snetd.ropsten.json & 
     

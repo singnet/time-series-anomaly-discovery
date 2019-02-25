@@ -120,6 +120,9 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
             printf("Using new sliding window size: %d\n\n", sliding_window_range);
         }
 
+        // fixed sliding window size
+        sliding_window_range = (double)time_series.size() * 0.07;
+
         // insert samples for the detection algorithm
         for (unsigned int sample = 0; sample < time_series.size(); sample++)
         {
