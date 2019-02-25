@@ -98,7 +98,7 @@ void DensityCurve::getJson(
         double time_s_val = _timeSeries[i];
         double normalized_density_cv_val = 0;
         double inverted_density_cv_val = 0;
-        if (i < _windowSize * 2 || i >= _density.size() - 1 - _windowSize * 2 )
+        if (i < _windowSize * 2 || i >= _density.size() - 1 - _windowSize )
         {
             density_cv_val = 0;
             normalized_density_cv_val = 0;
