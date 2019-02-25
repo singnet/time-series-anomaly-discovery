@@ -102,9 +102,6 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
         printf("paa_size: %s\n", pInInput->paasize().c_str());
         printf("debug_status: %s\n\n", pInInput->debugflag().c_str());
 
-        // create an anomaly discovery object
-        ErdbAnomalyDiscovery *anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
-
         // generate valid subsequence, reduce dimentionality
         if(time_series.size() > MAX_SAMPLES) 
         {
@@ -122,6 +119,9 @@ class ServiceImpl final : public EfficientRuleDensityBasedAnomalyDetection::Serv
 
         // fixed sliding window size
         sliding_window_range = (double)time_series.size() * 0.07;
+
+        // create an anomaly discovery object
+        ErdbAnomalyDiscovery *anomaly_discovery = new ErdbAnomalyDiscovery(alphabet, sliding_window_range, paa_size);
 
         // insert samples for the detection algorithm
         for (unsigned int sample = 0; sample < time_series.size(); sample++)
