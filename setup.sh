@@ -149,9 +149,9 @@ if [ $INSTALL_SNET_DAEMON == 1 ]; then
     # install daemon
     mkdir snet-daemon; \
     cd snet-daemon; \
-    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.6/snet-daemon-v0.1.6-linux-amd64.tar.gz; \
-    tar -xvf snet-daemon-v0.1.6-linux-amd64.tar.gz; \
-    mv ./snet-daemon-v0.1.6-linux-amd64/snetd /usr/bin/snetd; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.8/snet-daemon-v0.1.8-linux-amd64.tar.gz; \
+    tar -xvf snet-daemon-v0.1.8-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v0.1.8-linux-amd64/snetd /usr/bin/snetd; \
     cd ..; \
     rm -rf snet-daemon
 fi
