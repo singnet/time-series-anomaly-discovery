@@ -118,11 +118,8 @@ run()
 {
     # run daemon for kovan
     # (TODO:check if need to run directly from there)
-    # snetd --config ./snetd_configs/snetd.mainnet.json & 
+    snetd --config ./snetd_configs/snetd.mainnet.json & 
 
-    # run daemon for the ropsten
-    snetd --config ./snetd_configs/snetd.ropsten.json & 
-    
     # run server
     ./bin/release_server.out
 }
@@ -149,9 +146,9 @@ if [ $INSTALL_SNET_DAEMON == 1 ]; then
     # install daemon
     mkdir snet-daemon; \
     cd snet-daemon; \
-    wget -q https://github.com/singnet/snet-daemon/releases/download/v0.1.8/snet-daemon-v0.1.8-linux-amd64.tar.gz; \
-    tar -xvf snet-daemon-v0.1.8-linux-amd64.tar.gz; \
-    mv ./snet-daemon-v0.1.8-linux-amd64/snetd /usr/bin/snetd; \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/v2.0.2/snet-daemon-v2.0.2-linux-amd64.tar.gz; \
+    tar -xvzf snet-daemon-v2.0.2-linux-amd64.tar.gz; \
+    mv ./snet-daemon-v2.0.2-linux-amd64/snetd /usr/bin/snetd; \
     cd ..; \
     rm -rf snet-daemon
 fi
