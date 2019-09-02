@@ -134,7 +134,7 @@ jobs:
               -v /home/ubuntu/$REPOSITORY/etcd:/etcd \
               -v /home/ubuntu/$REPOSITORY/storage-data-dir-1.etcd:/storage-data-dir-1.etcd \
               -v /etc/letsencrypt:/etc/letsencrypt \
-              -v /home/singnet/.certs:/opt/singnet/.certs \
+              -v ~/singnet/.certs:/opt/singnet/.certs \
               --name $PROD_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME /bin/bash -c \
                 "cd /home/ubuntu; \
                  git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git; \
