@@ -1,7 +1,6 @@
 {
     "blockchain_network_selected": "main",
     "daemon_end_point": "0.0.0.0:7090",
-    "free_call_signer_address": "0x3Bb9b2499c283cec176e7C707Ecb495B7a961ebf",
     "ipfs_end_point": "http://ipfs.singularitynet.io:80",
     "log": {
         "level": "debug",
@@ -13,14 +12,16 @@
             "type": "file"
         }
     },
-    "metering_end_point": "https://mainnet-marketplace.singularitynet.io/metering",
+    "free_call_signer_address": "__FREE_CALL_SIGNER_ADDRESS__",
+    "ethereum_json_rpc_endpoint": "https://__NETWORK__.infura.io/v3/__ETHEREUM_JSON_RPC_ENDPOINT__",
+    "metering_end_point": ""https://__NETWORK__-marketplace.singularitynet.io/metering",
+    "pvt_key_for_metering": "__PVT_KEY_FOR_METERING__",
     "organization_id": "snet",
     "passthrough_enabled": true,
     "passthrough_endpoint": "http://localhost:7055",
     "payent_channel_ca_path": "/opt/singnet/.certs/ca.pem",
     "payent_channel_cert_path": "/opt/singnet/.certs/client.pem",
     "payent_channel_key_path": "/opt/singnet/.certs/client-key.pem",
-    "pvt_key_for_metering": "1b55e513c342179e5cdc980275d781becd9e4774ac2c5c6a0c01b95c1cb89135",
     "service_id": "time-series-anomaly-discovery",
     "ssl_cert": "/opt/singnet/.certs/fullchain.pem",
     "ssl_key": "/opt/singnet/.certs/privkey.pem"

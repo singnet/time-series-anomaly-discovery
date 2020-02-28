@@ -10,8 +10,9 @@ defaults: &defaults
     REPOSITORY: time-series-anomaly-discovery
 
     # cpp service base image, do not change this
-    BASE_CPP_IMAGE_NAME: cpp_service_base_image
-      
+    IMAGE_NAME: singnet_time_series_anomaly_discovery
+    PROD_DOCKER_CONTAINER_NAME: prod_singnet_time_series_anomaly_discovery
+
 version: 2
 jobs:
   build:    
@@ -20,138 +21,102 @@ jobs:
     - run:
         name: Start container based on base cpp-service image
         command: |
-          # check if base image exist
-          BASIC_IMAGE_STATUS="$(ssh -tt -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST 'docker images --format "{{.ID}}: {{.Repository}}" cpp_*')"
-
-          echo $BASE_CPP_IMAGE_NAME
-          echo $BASIC_IMAGE_STATUS
-        
           # staging and production container names
-          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
-          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
+          STAGING_IMAGE_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
 
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # try to remove staging container if it already exists
-            echo "Stopping and removing existing staging container for this user..."
-            docker stop $STAGING_DOCKER_CONTAINER_NAME || true
-            docker rm $STAGING_DOCKER_CONTAINER_NAME || true
-            echo "Finished."
+            docker rm -f $STAGING_DOCKER_CONTAINER_NAME || true
+            docker rmi -f $STAGING_IMAGE_NAME || true
 
-            # check if base cpp image exists, if not then build it with the assigned name
-            if [ "$BASIC_IMAGE_STATUS" = "" ]; then
-              echo "Creating base cpp service image since it does not exist"
-              docker build --no-cache -t $BASE_CPP_IMAGE_NAME:latest https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/master/Dockerfiles/CppServiceBaseDockerfile
-              echo "Finish..."
-            fi
+            docker build \
+              --no-cache \
+              --build-arg snetd_version=${SNETD_VERSION} \
+              --build-arg network=${NETWORK} \
+              --build-arg ethereum_json_rpc_endpoint=${ETHEREUM_JSON_RPC_ENDPOINT} \
+              --build-arg free_call_signer_address=${FREE_CALL_SIGNER_ADDRESS} \
+              --build-arg pvt_key_for_metering=${PVT_KEY_FOR_METERING} \
+              -t $STAGING_IMAGE_NAME \
+              https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/$CIRCLE_BRANCH/Dockerfiles/TimeSeriesAnomalyDiscovery
 
             # running the cpp service base container
-            echo "Running staging container based on the cpp basic service image..."
-            docker run -di --name $STAGING_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME
-            echo "Finished."
-         
-            # clonning this service repo into the cpp base container
-            echo "Downloading the $REPOSITORY service to the staging container..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
-              "cd /home/ubuntu; \
-               git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git"
-            echo "Finished."
+            docker run -di --name $STAGING_DOCKER_CONTAINER_NAME $STAGING_IMAGE_NAME tail -f /dev/null
           EOF
     - run:
         name: Build source
         command: |
           # staging and production container names
-          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
-          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
 
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # Build source and run tests
-            echo "Building source inside staging container and performing integration tests..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
-              "cd /home/ubuntu/$REPOSITORY; \
-               make clean; \
-               make"
-            echo "Finished."
+            docker exec $STAGING_DOCKER_CONTAINER_NAME make
           EOF
     - run:
         name: Perform unit tests
         command: |
           # staging and production container names
-          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
-          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
 
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # Build source and run tests
-            echo "Building source inside staging container and performing integration tests..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
-              "cd /home/ubuntu/$REPOSITORY; \
-               ./bin/release_cxxUnitTestsRunner.out"
-            echo "Finished."
+            docker exec $STAGING_DOCKER_CONTAINER_NAME ./bin/release_cxxUnitTestsRunner.out
           EOF
     - run:
         name: Perform integration tests
         command: |
           # staging and production container names
-          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
-          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
 
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             # Build source and run tests
-            echo "Building source inside staging container and performing integration tests..."
-            docker exec $STAGING_DOCKER_CONTAINER_NAME /bin/bash -c \
-              "cd /home/ubuntu/$REPOSITORY; \
-               ./bin/release_integrationTests.out"
-            echo "Finished."
+            docker exec $STAGING_DOCKER_CONTAINER_NAME ./bin/release_integrationTests.out
           EOF
     - run:
         name: Deploy service
         command: |
           # staging and production container names
-          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
-          PROD_DOCKER_CONTAINER_NAME="prod_${CIRCLE_PROJECT_USERNAME}_${REPOSITORY}"
+          STAGING_DOCKER_CONTAINER_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
+          STAGING_IMAGE_NAME="staging_${CIRCLE_PROJECT_USERNAME,,}_${REPOSITORY,,}"
 
           ssh -o "StrictHostKeyChecking no" $SSH_USER@$SSH_HOST << EOF
             if [ $CIRCLE_REPOSITORY_URL = "git@github.com:singnet/$REPOSITORY.git" ] && [ $CIRCLE_BRANCH = "master" ] ; then
-              echo "This service will be deployed since it passed all tests..."
-
-              # stop old production containers
-              echo "Stopping and removing old production container..."
-              docker stop $PROD_DOCKER_CONTAINER_NAME || true
-              docker rm $PROD_DOCKER_CONTAINER_NAME || true
-              echo "Finished."
-
-              # stop staging container
-              echo "Stopping and removing staging container..."
-              docker stop $STAGING_DOCKER_CONTAINER_NAME || true
-              docker rm $STAGING_DOCKER_CONTAINER_NAME || true 
-              echo "Finished."
+              # stop old production containers and etc
+              docker rm -f $PROD_DOCKER_CONTAINER_NAME || true
+              docker rm -f $STAGING_DOCKER_CONTAINER_NAME || true 
+              docker rmi -f $STAGING_IMAGE_NAME || true
+              docker rmi -f $IMAGE_NAME || true
+              
+              docker build \
+                --no-cache \
+                --build-arg snetd_version=${SNETD_VERSION} \
+                --build-arg network=${NETWORK} \
+                --build-arg ethereum_json_rpc_endpoint=${ETHEREUM_JSON_RPC_ENDPOINT} \
+                --build-arg free_call_signer_address=${FREE_CALL_SIGNER_ADDRESS} \
+                --build-arg pvt_key_for_metering=${PVT_KEY_FOR_METERING} \
+                -t $IMAGE_NAME \
+                https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/$CIRCLE_BRANCH/Dockerfiles/TimeSeriesAnomalyDiscovery
 
               # running the cpp service container, service daemon and server in a production container
-              echo "Creating production container..."
               docker run -tdi \
-              -p $SERVICE_DAEMON_PORT_KOVAN:$SERVICE_DAEMON_PORT_KOVAN \
-              -p $SERVICE_DAEMON_PORT_ROPSTEN:$SERVICE_DAEMON_PORT_ROPSTEN \
-              -v /home/ubuntu/$REPOSITORY/config:/config \
-              -v /home/ubuntu/$REPOSITORY/etcd:/etcd \
-              -v /home/ubuntu/$REPOSITORY/storage-data-dir-1.etcd:/storage-data-dir-1.etcd \
-              -v /etc/letsencrypt:/etc/letsencrypt \
-              -v ~/singnet/.certs:/opt/singnet/.certs \
-              --name $PROD_DOCKER_CONTAINER_NAME $BASE_CPP_IMAGE_NAME /bin/bash -c \
-                "cd /home/ubuntu; \
-                 git clone https://github.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY.git; \
-                 cd $REPOSITORY; \
-                 ./setup.sh -dr"
-              echo "Finished."
-              echo "Service is up."
+                -p $SERVICE_DAEMON_PORT_KOVAN:$SERVICE_DAEMON_PORT_KOVAN \
+                -p $SERVICE_DAEMON_PORT_ROPSTEN:$SERVICE_DAEMON_PORT_ROPSTEN \
+                -v /home/ubuntu/$REPOSITORY/config:/config \
+                -v /home/ubuntu/$REPOSITORY/etcd:/etcd \
+                -v /home/ubuntu/$REPOSITORY/storage-data-dir-1.etcd:/storage-data-dir-1.etcd \
+                -v /etc/letsencrypt:/etc/letsencrypt \
+                -v ~/singnet/.certs:/opt/singnet/.certs \
+                --restart unless-stopped \
+                --name $PROD_DOCKER_CONTAINER_NAME $IMAGE_NAME /bin/bash -c "./setup.sh -r"
             else
               echo "================================================================================"
               echo "                        Service WILL NOT be deployed"
               echo "================================================================================"
 
               # remove staging containers since tests and build failed
-              echo "Stopping and removing staging container..."
               docker stop $STAGING_DOCKER_CONTAINER_NAME || true
               docker rm $STAGING_DOCKER_CONTAINER_NAME || true
-              echo "Finished."
             fi
           EOF
 workflows:
