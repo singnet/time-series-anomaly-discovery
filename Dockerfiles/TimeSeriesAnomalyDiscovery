@@ -48,7 +48,7 @@ RUN export SNETD_GIT_VERSION=`curl -s https://api.github.com/repos/singnet/snet-
     rm -rf snet-daemon*
 
 # set private key for metering and etcd end-point
-RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__FREE_CALL_SIGNET_ADDRESS__/${free_call_signer_address}/g" > ./snetd_configs/snetd.mainnet.json
-RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__ETHEREUM_JSON_RPC_ENDPOINT__/${ethereum_json_rpc_endpoint}/g" > ./snetd_configs/snetd.mainnet.json
-RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__NETWORK__/${network}/g" > ./snetd_configs/snetd.mainnet.json
-RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__PVT_KEY_FOR_METERING__/${pvt_key_for_metering}/g" > ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__FREE_CALL_SIGNET_ADDRESS__/${free_call_signer_address}/g" > ./snetd_configs/snetd.mainnet.json.tmp && mv ./snetd_configs/snetd.mainnet.json.tmp ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__ETHEREUM_JSON_RPC_ENDPOINT__/${ethereum_json_rpc_endpoint}/g" > ./snetd_configs/snetd.mainnet.json.tmp && mv ./snetd_configs/snetd.mainnet.json.tmp ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__NETWORK__/${network}/g" > ./snetd_configs/snetd.mainnet.json.tmp && mv ./snetd_configs/snetd.mainnet.json.tmp ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__PVT_KEY_FOR_METERING__/${pvt_key_for_metering}/g" > ./snetd_configs/snetd.mainnet.json.tmp && mv ./snetd_configs/snetd.mainnet.json.tmp ./snetd_configs/snetd.mainnet.json
