@@ -4,6 +4,12 @@ FROM ubuntu:18.04
 # update
 RUN apt-get update
 
+ARG snetd_version
+ARG network
+ARG ethereum_json_rpc_endpoint
+ARG free_call_signer_address
+ARG pvt_key_for_metering
+
 # install deps
 RUN apt-get install -y libcurl4-gnutls-dev cxxtest nlohmann-json-dev build-essential autoconf libtool pkg-config \
                        libgflags-dev libgtest-dev clang libc++-dev git curl nano \
@@ -28,6 +34,21 @@ RUN cd /home/ubuntu; \
     cd time-series-anomaly-discovery; \
     ./setup.sh -d
 
-# run DAEMON and service
-CMD ["/bin/bash", "-c", "/home/ubuntu/time-series-anomaly-discovery/setup.sh -r"]
+WORKDIR /home/ubuntu/time-series-anomaly-discovery
 
+# set daemon
+RUN export SNETD_GIT_VERSION=`curl -s https://api.github.com/repos/singnet/snet-daemon/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")' || echo "v2.0.2"` \
+    export SNETD_VERSION=${snetd_version:-${SNETD_GIT_VERSION}} && \
+    mkdir snet-daemon && \
+    cd snet-daemon && \
+    wget -q https://github.com/singnet/snet-daemon/releases/download/${SNETD_VERSION}/snet-daemon-${SNETD_VERSION}-linux-amd64.tar.gz && \
+    tar -xvzf snet-daemon-${SNETD_VERSION}-linux-amd64.tar.gz && \
+    mv ./snet-daemon-${SNETD_VERSION}-linux-amd64/snetd /usr/bin/snetd && \
+    cd .. && \
+    rm -rf snet-daemon*
+
+# set private key for metering and etcd end-point
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__FREE_CALL_SIGNET_ADDRESS__/${free_call_signer_address}/g" > ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__ETHEREUM_JSON_RPC_ENDPOINT__/${ethereum_json_rpc_endpoint}/g" > ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__NETWORK__/${network}/g" > ./snetd_configs/snetd.mainnet.json
+RUN cat ./snetd_configs/snetd.mainnet.json | sed "s/__PVT_KEY_FOR_METERING__/${pvt_key_for_metering}/g" > ./snetd_configs/snetd.mainnet.json
