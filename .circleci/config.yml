@@ -85,28 +85,23 @@ jobs:
               # stop old production containers and etc
               docker rm -f $PROD_DOCKER_CONTAINER_NAME || true
               docker rm -f $STAGING_DOCKER_CONTAINER_NAME || true 
-              docker rmi -f $STAGING_IMAGE_NAME || true
-              docker rmi -f $IMAGE_NAME || true
-              
-              docker build \
-                --no-cache \
-                --build-arg snetd_version=${SNETD_VERSION} \
-                --build-arg network=${NETWORK} \
-                --build-arg ethereum_json_rpc_endpoint=${ETHEREUM_JSON_RPC_ENDPOINT} \
-                --build-arg free_call_signer_address=${FREE_CALL_SIGNER_ADDRESS} \
-                --build-arg pvt_key_for_metering=${PVT_KEY_FOR_METERING} \
-                -t $IMAGE_NAME \
-                https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$REPOSITORY/$CIRCLE_BRANCH/Dockerfiles/TimeSeriesAnomalyDiscovery
 
+              # remove old image
+              docker rmi -f $IMAGE_NAME || true
+
+              # create new deploy image
+              docker tag $STAGING_IMAGE_NAME $IMAGE_NAME
+
+              # remove staging image
+              docker rmi -f $STAGING_IMAGE_NAME || true
+              
               # running the cpp service container, service daemon and server in a production container
               docker run -tdi \
                 -p $SERVICE_DAEMON_PORT_KOVAN:$SERVICE_DAEMON_PORT_KOVAN \
                 -p $SERVICE_DAEMON_PORT_ROPSTEN:$SERVICE_DAEMON_PORT_ROPSTEN \
                 -v /home/ubuntu/$REPOSITORY/config:/config \
-                -v /home/ubuntu/$REPOSITORY/etcd:/etcd \
-                -v /home/ubuntu/$REPOSITORY/storage-data-dir-1.etcd:/storage-data-dir-1.etcd \
                 -v /etc/letsencrypt:/etc/letsencrypt \
-                -v ~/singnet/.certs:/opt/singnet/.certs \
+                -v ~/ci/singnet/.certs:/opt/singnet/.certs \
                 --restart unless-stopped \
                 --name $PROD_DOCKER_CONTAINER_NAME $IMAGE_NAME /bin/bash -c "./setup.sh -r"
             else
