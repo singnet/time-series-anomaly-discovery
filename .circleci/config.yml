@@ -101,7 +101,7 @@ jobs:
                 -p $SERVICE_DAEMON_PORT_ROPSTEN:$SERVICE_DAEMON_PORT_ROPSTEN \
                 -v /home/ubuntu/$REPOSITORY/config:/config \
                 -v /etc/letsencrypt:/etc/letsencrypt \
-                -v ~/ci/singnet/.certs:/opt/singnet/.certs \
+                -v /home/ci/singnet/.certs:/opt/singnet/.certs \
                 --restart unless-stopped \
                 --name $PROD_DOCKER_CONTAINER_NAME $IMAGE_NAME /bin/bash -c "./setup.sh -r"
             else
