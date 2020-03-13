@@ -12,16 +12,15 @@
             "type": "file"
         }
     },
-    "free_call_signer_address": "__FREE_CALL_SIGNER_ADDRESS__",
     "ethereum_json_rpc_endpoint": "https://__NETWORK__.infura.io/v3/__ETHEREUM_JSON_RPC_ENDPOINT__",
-    "metering_end_point": "https://__NETWORK__-marketplace.singularitynet.io/metering",
+    "metering_end_point": "https://__NETWORK__-marketplace.singularitynet.io",
     "pvt_key_for_metering": "__PVT_KEY_FOR_METERING__",
     "organization_id": "snet",
     "passthrough_enabled": true,
     "passthrough_endpoint": "http://localhost:7055",
-    "payent_channel_ca_path": "/opt/singnet/.certs/ca.pem",
-    "payent_channel_cert_path": "/opt/singnet/.certs/client.pem",
-    "payent_channel_key_path": "/opt/singnet/.certs/client-key.pem",
+    "payment_channel_ca_path": "/opt/singnet/.certs/ca.pem",
+    "payment_channel_cert_path": "/opt/singnet/.certs/client.pem",
+    "payment_channel_key_path": "/opt/singnet/.certs/client-key.pem",
     "service_id": "time-series-anomaly-discovery",
     "ssl_cert": "/opt/singnet/.certs/fullchain.pem",
     "ssl_key": "/opt/singnet/.certs/privkey.pem"
